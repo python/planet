@@ -1,0 +1,85 @@
+Feature Goals for Planet 1.0
+============================
+
+  * Store and use feed history
+
+    We have a huge problem at the moment, in that we only display the current
+    contents of the feeds we download. The old Netscape standard was 15 items
+    in a feed, so many people still use that. Unfortunately, on sites like
+    Slashdot, those 15 items move *very* quickly. So as they fall off the feed,
+    they fall off your Planet aggregate. That is bad, bad, bad, and we need to
+    solve it. Any ideas? There are potential bugs all over this. :-)
+
+  * Add multiple keyword support
+
+    I hadn't announced it yet, but I have added a simple 'keyword feeds'
+    feature, which allows you to subscribe to feeds and only display items that
+    mention your keyword in the title, summary or description. This is totally
+    arse-kickingly rad, and demonstrated on my personal Planet.
+    
+    However, currently it only allows you to define one keyword phrase for each
+    feed, which kinda sucks. If there's some quick-and-dirty boolean phrase
+    parser, we could use it really well here, for instance:
+
+      keyword = (gnome OR kde) NOT sucks
+
+    Maybe that's overkill - we could just support multiple ORed keyword fields.
+
+  * Fix stupid UTF-8 error with current keyword support
+
+    For some reason, keyword support tweaks string encoding errors, such as:
+    "WARNING:root:Item wasn't in UTF-8 or ISO-8859-1, replaced all non-ASCII
+    characters." This is bad.
+
+  * Allow templates to use extra feed elements
+
+    See Frederic's thread about Freshmeat the other day. I don't want to
+    special case everything, and I don't want to stomp on item variables we
+    already have, but it would be nice to bring special things from feeds up
+    into the template data structure. Should we only do this for namespaced
+    elements (extensions)?
+
+  * Fix intermittent timezone detection / arithmetic bugs
+
+    From Nick Moffitt: "Right now there's something screwy in the way planet
+    deals with time zones, so that all you Australians end up claiming the top
+    of my planet while merkins I want to read end up shoved down a ways."
+
+  * Allow display normalisation to specified timezone
+
+    Some Planet admins would like their feed to be displayed in the local
+    timezone, instead of UTC.
+
+  * Add "sort by entry received date" option
+
+    From Nick Moffitt: "Is there a way to get planet to not do entry-date
+    placement at all?  Like, always put new entries up in the order they were
+    first seen by planet?  I use mine to implement the "show me stuff I haven't
+    already read yet" feature that pretty much all Web sites lack.
+
+    Answer from Scott J. Remnant: "Yeah, this would be actually pretty easy ...
+    it already has this code for entries missing times entirely, I'll add a
+    config option to just outright ignore feed times and sort by seen order.
+    I'll make it a per-feed option, maybe "sort_order = seen/time" and if you
+    want it global just stick it in [DEFAULT]."
+
+  * Support OPML and foaf subscriptions
+
+    This might be a bit invasive, but I want to be able to subscribe to OPML
+    and FOAF files, and see each feed as if it were subscribed individually.
+    Perhaps we can do this with a two-pass configuration scheme, first to pull
+    the static configs, second to go fetch and generate the dynamic configs.
+    The more I think about it, the less invasive it sounds. Hmm.
+
+  * Provide a 'disabled' configuration option
+
+    Make it easy to mark a feed as disabled, but still show it on the subs
+    list. Perhaps disabled is the wrong word. Some people want to use Planet to
+    do their blogroll management, but not actually show some feeds in the
+    aggregation. If someone can think of a better word, please tell me.
+    Perhaps 'hide'.
+
+Other Feature Goals
+===================
+
+  * Port to feedparser 3.0

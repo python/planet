@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+<channel>
+	<title><TMPL_VAR name></title>
+	<link><TMPL_VAR link ESCAPE="HTML"></link>
+	<language>en</language>
+	<description><TMPL_VAR name> - <TMPL_VAR link ESCAPE="HTML"></description>
+
+<TMPL_LOOP Items>
+<item>
+	<title><TMPL_VAR channel_name><TMPL_IF title>: <TMPL_VAR title></TMPL_IF></title>
+	<guid><TMPL_VAR id ESCAPE="HTML"></guid>
+	<link><TMPL_VAR link ESCAPE="HTML"></link>
+	<TMPL_IF content>
+	<description><TMPL_VAR content ESCAPE="HTML"></description>
+	</TMPL_IF>
+	<pubDate><TMPL_VAR date_822></pubDate>
+	<TMPL_IF creator>
+	<dc:creator><TMPL_VAR creator></dc:creator>
+	</TMPL_IF>
+</item>
+</TMPL_LOOP>
+
+</channel>
+</rss>
