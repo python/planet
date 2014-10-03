@@ -142,14 +142,15 @@ def main():
             feed_timeout = None
 
     if feed_timeout and not offline:
-        try:
-            from planet import timeoutsocket
-            timeoutsocket.setDefaultSocketTimeout(feed_timeout)
-            log.debug("Socket timeout set to %d seconds", feed_timeout)
-        except ImportError:
+        if sys.version[:3] < '2.4':
+            try:
+                from planet import timeoutsocket as socket
+            except ImportError:
+                log.debug("timeoutsocket not found, using python function")
+                import socket
+        else:
             import socket
             if hasattr(socket, 'setdefaulttimeout'):
-                log.debug("timeoutsocket not found, using python function")
                 socket.setdefaulttimeout(feed_timeout)
                 log.debug("Socket timeout set to %d seconds", feed_timeout)
             else:
