@@ -18,6 +18,7 @@ import os
 import sys
 import time
 import locale
+import socket
 import urlparse
 
 import planet
@@ -129,11 +130,6 @@ def main():
     except:
         log.warning = log.warn
 
-    # timeoutsocket allows feedparser to time out rather than hang forever on
-    # ultra-slow servers.  Python 2.3 now has this functionality available in
-    # the standard socket library, so under 2.3 you don't need to install
-    # anything.  But you probably should anyway, because the socket module is
-    # buggy and timeoutsocket is better.
     if feed_timeout:
         try:
             feed_timeout = float(feed_timeout)
@@ -142,19 +138,8 @@ def main():
             feed_timeout = None
 
     if feed_timeout and not offline:
-        if sys.version[:3] < '2.4':
-            try:
-                from planet import timeoutsocket as socket
-            except ImportError:
-                log.debug("timeoutsocket not found, using python function")
-                import socket
-        else:
-            import socket
-            if hasattr(socket, 'setdefaulttimeout'):
-                socket.setdefaulttimeout(feed_timeout)
-                log.debug("Socket timeout set to %d seconds", feed_timeout)
-            else:
-                log.error("Unable to set timeout to %d seconds", feed_timeout)
+        socket.setdefaulttimeout(feed_timeout)
+        log.debug("Socket timeout set to %d seconds", feed_timeout)
 
     # run the planet
     my_planet = planet.Planet(config)
