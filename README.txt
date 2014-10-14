@@ -9,8 +9,6 @@ Maintaining Planet Python (planetpython.org):
   have to ask for a Python specific feed), and English-language
   content (ask for an English-language feed).
 
-  Note: https feeds currently don't seem to work.
-
 * Add the feed URL to a text config file (config/config.ini)::
 
       [http://example.org/feed/url/]
