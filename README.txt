@@ -1,6 +1,7 @@
 Maintaining Planet Python (planetpython.org):
 
-* Requests come in to the planet mailing list (planet@python.org):
+* Requests come in to the github issues (https://github.com/python/planet/issues) 
+  or planet mailing list (planet at python.org):
 
   https://mail.python.org/mailman/listinfo/planet
 
