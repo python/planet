@@ -4,8 +4,10 @@ Maintaining Planet Python (planetpython.org):
   or planet mailing list (planet at python.org):
 
   https://mail.python.org/mailman/listinfo/planet
+  
+* Chek the feed for validity using the services: http://feedvalidator.org/ or https://validator.w3.org/feed/ or http://www.rssboard.org/rss-validator/
 
-* Check the feed for: validity, Python-specific contents (often we
+* Check the feed for: Python-specific contents (often we
   have to ask for a Python specific feed), and English-language
   content (ask for an English-language feed).
 
