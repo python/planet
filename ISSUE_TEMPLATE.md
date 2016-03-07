@@ -1,4 +1,4 @@
-> Please choose a template **ADD FEED**, **EDIT FEED** or **INFORM a BUG/PROBLEM**
+> Please choose one template below **ADD FEED**, **EDIT FEED** or **INFORM a BUG/PROBLEM**. **PLEASE: Remove this line and the unused templates**
 
 
 # ADD FEED
