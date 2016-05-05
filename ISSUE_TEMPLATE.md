@@ -35,7 +35,7 @@ Hi, I want to change my current feed url from CURRENT_URL_HERE to NEW_URL_HERE
 Thanks in advance for changing my feed on Python Planet! :+1:
 
 
-# INFORM A BUG/PROBLEM
+# REPORT A BUG/PROBLEM
 -------------------------------------------------------------------------------
 
 Hi, I want to notify you of a bug/problem that is happening on the Planet.
