@@ -32,3 +32,5 @@ Thanks in advance for changing my feed on Python Planet! :+1:
 
 
 !!! PLEASE remove the unused templates above !!!
+
+NOTE: If you are adding a podcast feed please validate using http://castfeedvalidator.com/

@@ -35,6 +35,8 @@ Hi, I want to change my current feed url from CURRENT_URL_HERE to NEW_URL_HERE
 Thanks in advance for changing my feed on Python Planet! :+1:
 
 
+NOTE: If you are adding a podcast feed please validate using http://castfeedvalidator.com/
+
 # REPORT A BUG/PROBLEM
 -------------------------------------------------------------------------------
 
