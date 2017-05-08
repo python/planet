@@ -23,12 +23,26 @@ def write():
             fd.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
         fd.write("\n")
     
+    result = {}
     for section in sorted(oconfig._sections):
-        fd.write("[%s]\n" % section)
+        if section == 'Planet':
+            fd.write("[%s]\n" % section)
         for (key, value) in oconfig._sections[section].items():
             if key != "__name__":
-                fd.write("%s = %s\n" %
+                if section == 'Planet':
+                    fd.write("%s = %s\n" %
                          (key, str(value).replace('\n', '\n\t')))
+                else:
+                    result[value.replace('"', '')] = section
+        if section == 'Planet':
+            fd.write("\n")
+    
+    for key, value in sorted(result.items()):
+        fd.write("[%s]\n" % value)
+        name = key
+        if "'" in key:
+            name = '"%s"' % key
+        fd.write("name = %s\n" % name)
         fd.write("\n")
 
 write()
