@@ -1,0 +1,40 @@
+#left-hand-navigation, #google, #document-navigation, #border-corner, #smallcorner, #searchcorner, #logo, #search, #utility-menu, #skiptonav
+{
+  display:none;
+}
+
+#content-body
+{
+  font-family: Georgia, "Bitstream Vera Serif", "New York", Palatino, serif;
+  font-size:11pt;
+}
+
+#content-body a
+{
+  color: #000000;
+  text-decoration:none;
+  display:inline;
+}
+
+pre {
+  font-size:10pt;
+}
+
+#body-main a
+{
+  font-weight:bold;
+}
+
+
+h1
+{
+  font-size:14pt;
+}
+
+iframe {
+  display:none;
+}
+
+#footer {
+  display:none;
+}

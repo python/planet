@@ -1,0 +1,159 @@
+#left-hand-navigation
+{
+/*/*//*/
+    position:absolute;
+    left:5px;
+    top:10em;
+    z-index:1;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:0.75em;
+/* */
+}
+
+#left-hand-navigation a
+{
+/*/*//*/
+    color: #3C4B6B;
+/* */
+}
+
+#google
+{
+/*/*//*/
+    display:none;
+/* */
+}
+
+#content-body
+{
+/*/*//*/
+    position:absolute;
+    top:7em;
+    left:9em;
+    width:100%;
+    z-index:1;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:0.82em;
+/* */
+}
+
+#content-body a
+{
+/*/*//*/
+    color: #3C4B6B;
+/* */
+}
+
+#document-navigation
+{
+/*/*//*/
+    position: relative;
+    top:20px;
+    left:0%;
+    z-index:1;
+    padding:10px;
+/* */
+}
+
+#border-corner
+{
+/*/*//*/
+    display:none;
+/* */
+}
+
+#smallcorner
+{
+/*/*//*/
+    display:none;
+/* */
+}
+
+#searchcorner
+{
+/*/*//*/
+    display:none;
+/* */
+}
+
+
+
+#logoheader
+{
+/*/*//*/
+    position:absolute;
+    top:0;
+    border:0 none;
+    left:0;
+    padding:10px;
+    font-size: medium;
+    z-index: 1
+/* */
+}
+
+#logo
+{
+/*/*//*/
+   width:20px;
+/* */
+}
+
+#logolink
+{
+/*/*//*/
+    border:none;
+/* */
+}
+
+#search
+{
+/*/*//*/
+    border: none;
+    padding-top:20px;
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size:0.9em;
+    padding-top:5em;
+/* */
+}
+
+#skiptonav
+{
+/*/*//*/
+    border: 0px none;
+    display:none;
+/* */
+}
+
+#breadcrumb
+{
+/*/*//*/
+    position:absolute;
+    top:0px;
+/* */
+}
+
+#utility-menu
+{
+/*/*//*/
+    position:absolute;
+    top:8em;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:0.75em;
+/* */
+}
+
+#utility-menu a
+{
+/*/*//*/
+    color: #3C4B6B;
+/* */
+}
+
+ul
+{
+/*/*//*/
+    list-style: none;
+    padding:0;
+    margin-left:-20px;
+/* */
+}
