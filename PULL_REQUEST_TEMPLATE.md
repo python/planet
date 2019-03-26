@@ -7,7 +7,9 @@ PLEASE: Remove this headline and the unused templates!!!
 
 Hi, I want to add my feed to the Python Planet. or I want to change my current feed url from CURRENT_URL_HERE to NEW_URL_HERE
 
-## I checked the following required validations: (mark all 4 with [x])
+> IMPORTANT!!! **we need contact information to notify in case of any changes** Please send an email to `planet@python.org` title: `PR {number} sent to planet` with your email address + a link for the PR you opened.
+
+## I checked the following required validations: (mark all 5 with [x])
 
 1. [ ] My feed is valid, I checked using https://validator.w3.org/feed/check.cgi?url=MY_FEED_URL and it is valid!
 2. [ ] My feed is a **Python Specific** feed, e.g: I am proposing the filtered tag or categorized feed url
@@ -18,3 +20,5 @@ Hi, I want to add my feed to the Python Planet. or I want to change my current f
 Thanks in advance for adding my feed to the PythonPlanet! :+1:
 
 > NOTE: If you are adding a podcast feed please validate using http://castfeedvalidator.com/
+
+
