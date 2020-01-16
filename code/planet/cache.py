@@ -7,7 +7,7 @@ we parsed, this is so we don't lose information when a particular feed
 goes away or is too short to hold enough items.
 
 This module provides the code to handle this cache transparently enough
-that the rest of the code can take the persistance for granted.
+that the rest of the code can take the persistence for granted.
 """
 
 import os
