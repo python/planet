@@ -4,6 +4,11 @@ from xml.parsers.expat import ExpatError
 from htmlentitydefs import name2codepoint
 import re
 
+try:
+  unichr
+except NameError:
+  unichr = chr
+
 # select and apply an xml:base for this entry
 class relativize:
   def __init__(self, parent):

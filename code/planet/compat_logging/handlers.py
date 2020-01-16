@@ -25,6 +25,7 @@ Copyright (C) 2001-2002 Vinay Sajip. All Rights Reserved.
 
 To use, simply 'import logging' and log away!
 """
+from __future__ import print_function
 
 import sys, logging, socket, types, os, string, cPickle, struct, time
 
@@ -516,8 +517,8 @@ class NTEventLogHandler(logging.Handler):
                 logging.CRITICAL: win32evtlog.EVENTLOG_ERROR_TYPE,
          }
         except ImportError:
-            print "The Python Win32 extensions for NT (service, event "\
-                        "logging) appear not to be available."
+            print("The Python Win32 extensions for NT (service, event "\
+                        "logging) appear not to be available.")
             self._welu = None
 
     def getMessageID(self, record):
@@ -595,7 +596,7 @@ class HTTPHandler(logging.Handler):
         logging.Handler.__init__(self)
         method = string.upper(method)
         if method not in ["GET", "POST"]:
-            raise ValueError, "method must be GET or POST"
+            raise ValueError("method must be GET or POST")
         self.host = host
         self.url = url
         self.method = method

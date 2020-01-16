@@ -106,7 +106,7 @@ def fileConfig(fname, defaults=None):
                     klass = eval(klass, vars(logging))
                     args = cp.get(sectname, "args")
                     args = eval(args, vars(logging))
-                    h = apply(klass, args)
+                    h = klass(*args)
                     if "level" in opts:
                         level = cp.get(sectname, "level")
                         h.setLevel(logging._levelNames[level])
@@ -202,7 +202,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
     stopListening().
     """
     if not thread:
-        raise NotImplementedError, "listen() needs threading to work"
+        raise NotImplementedError("listen() needs threading to work")
 
     class ConfigStreamHandler(StreamRequestHandler):
         """
@@ -239,8 +239,8 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                     f.close()
                     fileConfig(file)
                     os.remove(file)
-            except socket.error, e:
-                if type(e.args) != types.TupleType:
+            except socket.error as e:
+                if isinstance(e.args, tuple):
                     raise
                 else:
                     errcode = e.args[0]

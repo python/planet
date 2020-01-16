@@ -10,9 +10,14 @@ This module provides the code to handle this cache transparently enough
 that the rest of the code can take the persistence for granted.
 """
 
+from future.utils import raise_
 import os
 import re
 
+try:
+    unicode
+except NameError:
+    unicode = str
 
 # Regular expressions to sanitise cache filenames
 re_url_scheme    = re.compile(r'^[^:]*://')
@@ -198,7 +203,7 @@ class CachedInfo:
         """Return the key as a string value."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise_(KeyError, key)
 
         return self._value[key]
 
@@ -218,7 +223,7 @@ class CachedInfo:
         """Return the key as a date value."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise_(KeyError, key)
 
         value = self._value[key]
         return tuple([ int(i) for i in value.split(" ") ])
@@ -237,7 +242,7 @@ class CachedInfo:
         """Return the key as the null value."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise_(KeyError, key)
 
         return None
 
@@ -245,7 +250,7 @@ class CachedInfo:
         """Delete the given key."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise_(KeyError, key)
 
         del(self._value[key])
         del(self._type[key])
@@ -276,7 +281,7 @@ class CachedInfo:
         if self.has_key(key):
             return self.get(key)
         else:
-            raise AttributeError, key
+            raise_(AttributeError, key)
 
 
 def filename(directory, filename):

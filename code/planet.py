@@ -8,6 +8,7 @@ the latest version.
 
 Requires Python 2.1, recommends 2.3.
 """
+from __future__ import print_function
 
 __authors__ = [ "Scott James Remnant <scott@netsplit.com>",
                 "Jeff Waugh <jdub@perkypants.org>" ]
@@ -56,20 +57,20 @@ def main():
 
     for arg in sys.argv[1:]:
         if arg == "-h" or arg == "--help":
-            print "Usage: planet [options] [CONFIGFILE]"
-            print
-            print "Options:"
-            print " -v, --verbose       DEBUG level logging during update"
-            print " -o, --offline       Update the Planet from the cache only"
-            print " -h, --help          Display this help message and exit"
-            print
+            print("Usage: planet [options] [CONFIGFILE]")
+            print()
+            print("Options:")
+            print(" -v, --verbose       DEBUG level logging during update")
+            print(" -o, --offline       Update the Planet from the cache only")
+            print(" -h, --help          Display this help message and exit")
+            print()
             sys.exit(0)
         elif arg == "-v" or arg == "--verbose":
             verbose = 1
         elif arg == "-o" or arg == "--offline":
             offline = 1
         elif arg.startswith("-"):
-            print >>sys.stderr, "Unknown option:", arg
+            print("Unknown option:", arg, file=sys.stderr)
             sys.exit(1)
         else:
             config_file = arg
@@ -78,7 +79,7 @@ def main():
     config = ConfigParser()
     config.read(config_file)
     if not config.has_section("Planet"):
-        print >>sys.stderr, "Configuration missing [Planet] section."
+        print("Configuration missing [Planet] section.", file=sys.stderr)
         sys.exit(1)
 
     # Read the [Planet] config section
@@ -118,7 +119,7 @@ def main():
                 locale_ok = True
                 break
         if not locale_ok:
-            print >>sys.stderr, "Unsupported locale setting."
+            print("Unsupported locale setting.", file=sys.stderr)
             sys.exit(1)
 
     # Activate logging

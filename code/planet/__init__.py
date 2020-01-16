@@ -41,6 +41,11 @@ except:
     def escape(data):
         return data.replace("&","&amp;").replace(">","&gt;").replace("<","&lt;")
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 # Version information (for generator headers)
 VERSION = ("Planet/%s +http://www.planetplanet.org" % __version__)
 
@@ -504,7 +509,7 @@ class Channel(cache.CachedInfo):
         if not os.path.isdir(planet.cache_directory):
             os.makedirs(planet.cache_directory)
         cache_filename = cache.filename(planet.cache_directory, url)
-        cache_file = dbhash.open(cache_filename, "c", 0666)
+        cache_file = dbhash.open(cache_filename, "c", 0o666)
 
         cache.CachedInfo.__init__(self, cache_file, url, root=1)
 
