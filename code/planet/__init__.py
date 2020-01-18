@@ -44,7 +44,7 @@ except:
 # Version information (for generator headers)
 VERSION = ("Planet/%s +http://www.planetplanet.org" % __version__)
 
-# Default User-Agent header to send when retreiving feeds
+# Default User-Agent header to send when retrieving feeds
 USER_AGENT = VERSION + " " + feedparser.USER_AGENT
 
 # Default cache directory
