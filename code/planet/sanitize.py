@@ -19,7 +19,7 @@ TIDY_MARKUP = 0
 # if TIDY_MARKUP = 1
 PREFERRED_TIDY_INTERFACES = ["uTidy", "mxTidy"]
 
-import sgmllib, re
+import sgmllib, sys, re
 
 # chardet library auto-detects character encodings
 # Download from http://chardet.feedparser.org/
