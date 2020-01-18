@@ -439,7 +439,7 @@ class TemplateProcessor:
             should be automatically looked up in enclosing scopes.
 
             Automatic global lookup is disabled by default. Global lookup
-            can be overriden on a per-variable basis by the
+            can be overridden on a per-variable basis by the
             <strong>GLOBAL</strong> parameter of a <strong>TMPL_VAR</strong>
             statement.
 
@@ -681,7 +681,7 @@ class TemplateProcessor:
                         output_control.pop()
                         self.DEB("LOOP: END")
                     else:
-                        # Jump to the beggining of this loop block 
+                        # Jump to the beginning of this loop block 
                         # to process next pass of the loop.
                         i = loop_start[-1]
                         self.DEB("LOOP: NEXT PASS")
@@ -934,7 +934,7 @@ class TemplateCompiler:
         class. The compiled form is used as input for the TemplateProcessor
         which uses it to actually process the template.
 
-        This class should be used direcly only when you need to compile
+        This class should be used directly only when you need to compile
         a template from a string. If your template is in a file, then you
         should use the <em>TemplateManager</em> class which provides
         a higher level interface to this class and also can save the
@@ -1234,7 +1234,7 @@ class TemplateCompiler:
     
     def strip_brackets(self, statement):
         """ Strip HTML brackets (with optional HTML comments) from the
-            beggining and from the end of a statement.
+            beginning and from the end of a statement.
             @hidden
         """
         if statement.startswith("<!-- TMPL_") or \
@@ -1254,7 +1254,7 @@ class TemplateCompiler:
 
     def find_name(self, params):
         """ Extract identifier from a statement. The identifier can be
-            specified both implicitely or explicitely as a 'NAME' parameter.
+            specified both implicitly or explicitly as a 'NAME' parameter.
             @hidden
         """
         if len(params) > 0 and '=' not in params[0]:
