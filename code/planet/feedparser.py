@@ -1840,7 +1840,7 @@ def _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, h
     User-Agent request header.
 
     If the referrer argument is supplied, it will be used as the value of a
-    Referer[sic] request header.
+    Referrer request header.
 
     If handlers is supplied, it is a list of handlers used to build a
     urllib2 opener.
