@@ -12,5 +12,5 @@
          with:
            python-version: 2.7
        - run: pip install codespell flake8
-       - run: codespell -L squirl,uptodate,UPTODATE --skip=./.*,./config/config.ini
+       - run: codespell -L nto,squirl,uptodate,UPTODATE --skip=./.*,./config/config.ini
        - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
