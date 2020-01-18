@@ -18,7 +18,7 @@ fd = open(filename, 'wb')
 def write():
     # Copy of write() code that sorts output by section
     if oconfig._defaults:
-        fd.write("[%s]\n" % DEFAULTSECT)
+        fd.write("[%s]\n" % ConfigParser.DEFAULTSECT)
         for (key, value) in oconfig._defaults.items():
             fd.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
         fd.write("\n")
