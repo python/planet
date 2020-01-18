@@ -240,7 +240,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                     fileConfig(file)
                     os.remove(file)
             except socket.error as e:
-                if isinstance(e.args, tuple):
+                if not isinstance(e.args, tuple):
                     raise
                 else:
                     errcode = e.args[0]
