@@ -1,9 +1,6 @@
 Maintaining Planet Python (planetpython.org):
 
-* Requests come in to the github issues (https://github.com/python/planet/issues) 
-  or planet mailing list (planet at python.org):
-
-  https://mail.python.org/mailman/listinfo/planet
+* Requests come in to the github issues (https://github.com/python/planet/issues)
   
 * Check the feed for validity using the services: https://validator.w3.org/feed/ or http://www.rssboard.org/rss-validator/
 
