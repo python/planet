@@ -1,4 +1,4 @@
-Maintaining Planet Python (planetpython.org):
+Maintaining Planet Python (https://planetpython.org):
 
 * Requests come in to the github issues (https://github.com/python/planet/issues)
   
