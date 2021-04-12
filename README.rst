@@ -8,7 +8,7 @@ Maintaining Planet Python (planetpython.org):
   have to ask for a Python specific feed), and English-language
   content (ask for an English-language feed).
 
-* Add the feed URL to a text config file (config/config.ini)::
+* Add the feed URL to a text config file (`config/config.ini <https://github.com/python/planet/blob/master/config/config.ini>`_)::
 
       [http://example.org/feed/url/]
       name = Author/Group/Project Name
