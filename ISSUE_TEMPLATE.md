@@ -11,8 +11,6 @@ Hi, I want to add my feed to the Python Planet or I want to change my current fe
 
 **My Blog RSS or ATOM Python specific feed url**: MY_FEED_URL
 
-> IMPORTANT!!! **we need contact information to notify in case of any changes** Please send an email to `planet@python.org` title: `PR {number} sent to planet` with your email address + a link for the PR you opened.
- 
 ## I checked the following required validations: (mark all 5 with [x])
 
 1. [ ] My feed is valid, I checked using https://validator.w3.org/feed/check.cgi?url=MY_FEED_URL and it is valid!
