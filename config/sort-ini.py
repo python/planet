@@ -11,11 +11,10 @@ else:
 oconfig = ConfigParser.RawConfigParser()
 oconfig.read(filename)
 
-# This write will destroy the configuration if there's a crash while
-# writing the output.  We're in an SVN-controlled directory, so
+# This part will destroy the configuration if there's a crash while
+# writing the output.  We're in an GIT-controlled directory, so
 # I didn't care enough to fix this.
-fd = open(filename, 'wb')
-def write():
+with open(filename, 'wb') as fd:
     # Copy of write() code that sorts output by section
     if oconfig._defaults:
         fd.write("[%s]\n" % DEFAULTSECT)
@@ -45,6 +44,3 @@ def write():
         fd.write("name = %s\n" % name)
         fd.write("\n")
 
-write()
-
-fd.close()
