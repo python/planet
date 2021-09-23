@@ -2,7 +2,7 @@ Maintaining Planet Python (https://planetpython.org):
 
 * Requests come in to the github issues (https://github.com/python/planet/issues)
   
-* Check the feed for validity using the services: https://validator.w3.org/feed/ or http://www.rssboard.org/rss-validator/
+* Check the feed for validity using the services: https://validator.w3.org/feed/ or https://www.rssboard.org/rss-validator/
 
 * Check the feed for: Python-specific contents (often we
   have to ask for a Python specific feed), and English-language
