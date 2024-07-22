@@ -39,7 +39,7 @@ except:
     chardet = None
     _chardet = lambda data: None
 
-class _BaseHTMLProcessor(sgmllib.SGMLParser):
+class _BaseHTMLProcessor(HTMLParser):
     elements_no_end_tag = ['area', 'base', 'basefont', 'br', 'col', 'frame', 'hr',
       'img', 'input', 'isindex', 'link', 'meta', 'param']
     
@@ -49,12 +49,12 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
     
     def __init__(self, encoding):
         self.encoding = encoding
-        if _debug: sys.stderr.write('entering BaseHTMLProcessor, encoding=%s\n' % self.encoding)
-        sgmllib.SGMLParser.__init__(self)
+        if _debug: sys.stderr.write(f'entering BaseHTMLProcessor, encoding={self.encoding}\n')
+        super().__init__(convert_charrefs=False)
         
     def reset(self):
         self.pieces = []
-        sgmllib.SGMLParser.reset(self)
+        super().reset()
 
     def _shorttag_replace(self, match):
         tag = match.group(1)
@@ -66,10 +66,10 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
     def feed(self, data):
         data = self._r_barebang.sub(r'&lt;!\1', data)
         data = self._r_bareamp.sub("&amp;", data)
-        data = self._r_shorttag.sub(self._shorttag_replace, data) 
-        if self.encoding and type(data) == str:
+        data = self._r_shorttag.sub(self._shorttag_replace, data)
+        if self.encoding and isinstance(data, str):
             data = data.encode(self.encoding)
-        sgmllib.SGMLParser.feed(self, data)
+        super().feed(data)
 
     def normalize_attrs(self, attrs):
         # utility method to be called by descendants
@@ -235,6 +235,7 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
             text = text.replace('<', '')
             _BaseHTMLProcessor.handle_data(self, text)
 
+# TODO(py2to3): we need to replace `mx` and `tidy` here
 def HTML(htmlSource, encoding='utf8'):
     p = _HTMLSanitizer(encoding)
     p.feed(htmlSource)
