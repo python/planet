@@ -252,8 +252,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                         raise
 
     class ConfigSocketReceiver(ThreadingTCPServer):
-        """A simple TCP socket-based logging config receiver.
-        """
+        """A simple TCP socket-based logging config receiver."""
 
         allow_reuse_address = 1
 
@@ -288,8 +287,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
 
 
 def stopListening():
-    """Stop the listening server which was created with a call to listen().
-    """
+    """Stop the listening server which was created with a call to listen()."""
     global _listener
     if _listener:
         logging._acquireLock()

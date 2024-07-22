@@ -238,7 +238,6 @@ class CachedInfo:
         if not self.has_key(key):
             raise KeyError(key)
 
-
     def del_key(self, key):
         """Delete the given key."""
         key = key.replace(" ", "_")

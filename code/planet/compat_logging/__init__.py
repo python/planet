@@ -165,8 +165,7 @@ def _acquireLock():
 
 
 def _releaseLock():
-    """Release the module-level lock acquired by calling _acquireLock().
-    """
+    """Release the module-level lock acquired by calling _acquireLock()."""
     if _lock:
         _lock.release()
 
@@ -189,8 +188,7 @@ class LogRecord:
     """
 
     def __init__(self, name, level, pathname, lineno, msg, args, exc_info):
-        """Initialize a logging record with interesting information.
-        """
+        """Initialize a logging record with interesting information."""
         ct = time.time()
         self.name = name
         self.msg = msg
@@ -380,8 +378,7 @@ _defaultFormatter = Formatter()
 
 
 class BufferingFormatter:
-    """A formatter suitable for formatting a number of records.
-    """
+    """A formatter suitable for formatting a number of records."""
 
     def __init__(self, linefmt=None):
         """Optionally specify a formatter which will be used to format each
@@ -393,18 +390,15 @@ class BufferingFormatter:
             self.linefmt = _defaultFormatter
 
     def formatHeader(self, records):
-        """Return the header string for the specified records.
-        """
+        """Return the header string for the specified records."""
         return ""
 
     def formatFooter(self, records):
-        """Return the footer string for the specified records.
-        """
+        """Return the footer string for the specified records."""
         return ""
 
     def format(self, records):
-        """Format the specified records and return the result as a string.
-        """
+        """Format the specified records and return the result as a string."""
         rv = ""
         if len(records) > 0:
             rv = rv + self.formatHeader(records)
@@ -459,19 +453,16 @@ class Filterer:
     """
 
     def __init__(self):
-        """Initialize the list of filters to be an empty list.
-        """
+        """Initialize the list of filters to be an empty list."""
         self.filters = []
 
     def addFilter(self, filter):
-        """Add the specified filter to this handler.
-        """
+        """Add the specified filter to this handler."""
         if filter not in self.filters:
             self.filters.append(filter)
 
     def removeFilter(self, filter):
-        """Remove the specified filter from this handler.
-        """
+        """Remove the specified filter from this handler."""
         if filter in self.filters:
             self.filters.remove(filter)
 
@@ -522,28 +513,24 @@ class Handler(Filterer):
         self.createLock()
 
     def createLock(self):
-        """Acquire a thread lock for serializing access to the underlying I/O.
-        """
+        """Acquire a thread lock for serializing access to the underlying I/O."""
         if thread:
             self.lock = thread.allocate_lock()
         else:
             self.lock = None
 
     def acquire(self):
-        """Acquire the I/O thread lock.
-        """
+        """Acquire the I/O thread lock."""
         if self.lock:
             self.lock.acquire()
 
     def release(self):
-        """Release the I/O thread lock.
-        """
+        """Release the I/O thread lock."""
         if self.lock:
             self.lock.release()
 
     def setLevel(self, level):
-        """Set the logging level of this handler.
-        """
+        """Set the logging level of this handler."""
         self.level = level
 
     def format(self, record):
@@ -584,8 +571,7 @@ class Handler(Filterer):
         return rv
 
     def setFormatter(self, fmt):
-        """Set the formatter for this handler.
-        """
+        """Set the formatter for this handler."""
         self.formatter = fmt
 
     def flush(self):
@@ -639,8 +625,7 @@ class StreamHandler(Handler):
         self.formatter = None
 
     def flush(self):
-        """Flushes the stream.
-        """
+        """Flushes the stream."""
         self.stream.flush()
 
     def emit(self, record):
@@ -667,19 +652,16 @@ class StreamHandler(Handler):
 
 
 class FileHandler(StreamHandler):
-    """A handler class which writes formatted logging records to disk files.
-    """
+    """A handler class which writes formatted logging records to disk files."""
 
     def __init__(self, filename, mode="a"):
-        """Open the specified file and use it as the stream for logging.
-        """
+        """Open the specified file and use it as the stream for logging."""
         StreamHandler.__init__(self, open(filename, mode))
         self.baseFilename = filename
         self.mode = mode
 
     def close(self):
-        """Closes the stream.
-        """
+        """Closes the stream."""
         self.stream.close()
 
 
@@ -695,13 +677,11 @@ class PlaceHolder:
     """
 
     def __init__(self, alogger):
-        """Initialize with the specified logger being a child of this placeholder.
-        """
+        """Initialize with the specified logger being a child of this placeholder."""
         self.loggers = [alogger]
 
     def append(self, alogger):
-        """Add the specified logger as a child of this placeholder.
-        """
+        """Add the specified logger as a child of this placeholder."""
         if alogger not in self.loggers:
             self.loggers.append(alogger)
 
@@ -730,8 +710,7 @@ class Manager:
     """
 
     def __init__(self, rootnode):
-        """Initialize the manager with the root node of the logger hierarchy.
-        """
+        """Initialize the manager with the root node of the logger hierarchy."""
         self.root = rootnode
         self.disable = 0
         self.emittedNoHandlerWarning = 0
@@ -821,8 +800,7 @@ class Logger(Filterer):
     """
 
     def __init__(self, name, level=NOTSET):
-        """Initialize the logger with a name and an optional level.
-        """
+        """Initialize the logger with a name and an optional level."""
         Filterer.__init__(self)
         self.name = name
         self.level = level
@@ -832,8 +810,7 @@ class Logger(Filterer):
         self.disabled = 0
 
     def setLevel(self, level):
-        """Set the logging level of this logger.
-        """
+        """Set the logging level of this logger."""
         self.level = level
 
     #   def getRoot(self):
@@ -897,8 +874,7 @@ class Logger(Filterer):
             self._log(ERROR, msg, args, **kwargs)
 
     def exception(self, msg, *args):
-        """Convenience method for logging an ERROR with exception information.
-        """
+        """Convenience method for logging an ERROR with exception information."""
         self.error(msg, *args, exc_info=True)
 
     def critical(self, msg, *args, **kwargs):
@@ -971,14 +947,12 @@ class Logger(Filterer):
             self.callHandlers(record)
 
     def addHandler(self, hdlr):
-        """Add the specified handler to this logger.
-        """
+        """Add the specified handler to this logger."""
         if hdlr not in self.handlers:
             self.handlers.append(hdlr)
 
     def removeHandler(self, hdlr):
-        """Remove the specified handler from this logger.
-        """
+        """Remove the specified handler from this logger."""
         if hdlr in self.handlers:
             # hdlr.close()
             self.handlers.remove(hdlr)
@@ -1021,8 +995,7 @@ class Logger(Filterer):
         return NOTSET
 
     def isEnabledFor(self, level):
-        """Is this logger enabled for level 'level'?
-        """
+        """Is this logger enabled for level 'level'?"""
         if self.manager.disable >= level:
             return 0
         return level >= self.getEffectiveLevel()
@@ -1035,8 +1008,7 @@ class RootLogger(Logger):
     """
 
     def __init__(self, level):
-        """Initialize the logger with the name "root".
-        """
+        """Initialize the logger with the name "root"."""
         Logger.__init__(self, "root", level)
 
 
@@ -1093,8 +1065,7 @@ def getLogger(name=None):
 
 
 def critical(msg, *args, **kwargs):
-    """Log a message with severity 'CRITICAL' on the root logger.
-    """
+    """Log a message with severity 'CRITICAL' on the root logger."""
     if len(root.handlers) == 0:
         basicConfig()
     root.critical(msg, *args, **kwargs)
@@ -1104,8 +1075,7 @@ fatal = critical
 
 
 def error(msg, *args, **kwargs):
-    """Log a message with severity 'ERROR' on the root logger.
-    """
+    """Log a message with severity 'ERROR' on the root logger."""
     if len(root.handlers) == 0:
         basicConfig()
     root.error(msg, *args, **kwargs)
@@ -1119,8 +1089,7 @@ def exception(msg, *args):
 
 
 def warning(msg, *args, **kwargs):
-    """Log a message with severity 'WARNING' on the root logger.
-    """
+    """Log a message with severity 'WARNING' on the root logger."""
     if len(root.handlers) == 0:
         basicConfig()
     root.warning(msg, *args, **kwargs)
@@ -1130,24 +1099,21 @@ warn = warning
 
 
 def info(msg, *args, **kwargs):
-    """Log a message with severity 'INFO' on the root logger.
-    """
+    """Log a message with severity 'INFO' on the root logger."""
     if len(root.handlers) == 0:
         basicConfig()
     root.info(msg, *args, **kwargs)
 
 
 def debug(msg, *args, **kwargs):
-    """Log a message with severity 'DEBUG' on the root logger.
-    """
+    """Log a message with severity 'DEBUG' on the root logger."""
     if len(root.handlers) == 0:
         basicConfig()
     root.debug(msg, *args, **kwargs)
 
 
 def disable(level):
-    """Disable all logging calls less severe than 'level'.
-    """
+    """Disable all logging calls less severe than 'level'."""
     root.manager.disable = level
 
 

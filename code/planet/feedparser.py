@@ -2339,7 +2339,9 @@ def _sanitizeHTML(htmlSource, encoding):
 
 
 class _FeedURLHandler(
-    urllib.request.HTTPDigestAuthHandler, urllib.request.HTTPRedirectHandler, urllib.request.HTTPDefaultErrorHandler,
+    urllib.request.HTTPDigestAuthHandler,
+    urllib.request.HTTPRedirectHandler,
+    urllib.request.HTTPDefaultErrorHandler,
 ):
     def http_error_default(self, req, fp, code, msg, headers):
         if ((code / 100) == 3) and (code != 304):
@@ -2638,10 +2640,10 @@ _korean_am = "\uc624\uc804"  # bfc0 c0fc in euc-kr
 _korean_pm = "\uc624\ud6c4"  # bfc0 c8c4 in euc-kr
 
 _korean_onblog_date_re = re.compile(
-    fr"(\d{{4}}){_korean_year}\s+(\d{{2}}){_korean_month}\s+(\d{{2}}){_korean_day}\s+(\d{{2}}):(\d{{2}}):(\d{{2}})",
+    rf"(\d{{4}}){_korean_year}\s+(\d{{2}}){_korean_month}\s+(\d{{2}}){_korean_day}\s+(\d{{2}}):(\d{{2}}):(\d{{2}})",
 )
 _korean_nate_date_re = re.compile(
-    fr"(\d{{4}})-(\d{{2}})-(\d{{2}})\s+({_korean_am}|{_korean_pm})\s+(\d{{,2}}):(\d{{,2}}):(\d{{,2}})",
+    rf"(\d{{4}})-(\d{{2}})-(\d{{2}})\s+({_korean_am}|{_korean_pm})\s+(\d{{,2}}):(\d{{,2}}):(\d{{,2}})",
 )
 
 
@@ -2905,9 +2907,7 @@ def _parse_date_w3dtf(dateString):
     )
     __tzd_re = r"(?P<tzd>[-+](?P<tzdhours>\d\d)(?::?(?P<tzdminutes>\d\d))|Z)"
     __tzd_rx = re.compile(__tzd_re)
-    __time_re = (
-        r"(?P<hours>\d\d)(?P<tsep>:|)(?P<minutes>\d\d)(?:(?P=tsep)(?P<seconds>\d\d(?:[.,]\d+)?))?" + __tzd_re
-    )
+    __time_re = r"(?P<hours>\d\d)(?P<tsep>:|)(?P<minutes>\d\d)(?:(?P=tsep)(?P<seconds>\d\d(?:[.,]\d+)?))?" + __tzd_re
     __datetime_re = f"{__date_re}(?:T{__time_re})?"
     __datetime_rx = re.compile(__datetime_re)
     m = __datetime_rx.match(dateString)
@@ -2964,7 +2964,7 @@ def _parse_date(dateString):
             return date9tuple
         except Exception as e:
             if _debug:
-                sys.stderr.write(f"{handler.__name__} raised {repr(e)}\n")
+                sys.stderr.write(f"{handler.__name__} raised {e!r}\n")
     return None
 
 

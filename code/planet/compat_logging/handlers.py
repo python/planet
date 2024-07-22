@@ -73,8 +73,7 @@ class RotatingFileHandler(logging.FileHandler):
             self.mode = "a"
 
     def doRollover(self):
-        """Do a rollover, as described in __init__().
-        """
+        """Do a rollover, as described in __init__()."""
         self.stream.close()
         if self.backupCount > 0:
             for i in range(self.backupCount - 1, 0, -1):
@@ -195,8 +194,7 @@ class SocketHandler(logging.Handler):
             self.handleError(record)
 
     def close(self):
-        """Closes the socket.
-        """
+        """Closes the socket."""
         if self.sock:
             self.sock.close()
             self.sock = None
@@ -214,8 +212,7 @@ class DatagramHandler(SocketHandler):
     """
 
     def __init__(self, host, port):
-        """Initializes the handler with a specific host address and port.
-        """
+        """Initializes the handler with a specific host address and port."""
         SocketHandler.__init__(self, host, port)
         self.closeOnError = 0
 
@@ -369,8 +366,7 @@ class SysLogHandler(logging.Handler):
         return (facility << 3) | priority
 
     def close(self):
-        """Closes the socket.
-        """
+        """Closes the socket."""
         if self.unixsocket:
             self.socket.close()
 
@@ -396,8 +392,7 @@ class SysLogHandler(logging.Handler):
 
 
 class SMTPHandler(logging.Handler):
-    """A handler class which sends an SMTP email for each logging event.
-    """
+    """A handler class which sends an SMTP email for each logging event."""
 
     def __init__(self, mailhost, fromaddr, toaddrs, subject):
         """Initialize the handler.
@@ -619,8 +614,7 @@ class BufferingHandler(logging.Handler):
     """
 
     def __init__(self, capacity):
-        """Initialize the handler with the buffer size.
-        """
+        """Initialize the handler with the buffer size."""
         logging.Handler.__init__(self)
         self.capacity = capacity
         self.buffer = []
@@ -669,13 +663,11 @@ class MemoryHandler(BufferingHandler):
         self.target = target
 
     def shouldFlush(self, record):
-        """Check for buffer full or a record at the flushLevel or higher.
-        """
+        """Check for buffer full or a record at the flushLevel or higher."""
         return (len(self.buffer) >= self.capacity) or (record.levelno >= self.flushLevel)
 
     def setTarget(self, target):
-        """Set the target handler for this handler.
-        """
+        """Set the target handler for this handler."""
         self.target = target
 
     def flush(self):
@@ -689,8 +681,7 @@ class MemoryHandler(BufferingHandler):
             self.buffer = []
 
     def close(self):
-        """Flush, set the target to None and lose the buffer.
-        """
+        """Flush, set the target to None and lose the buffer."""
         self.flush()
         self.target = None
         self.buffer = []
