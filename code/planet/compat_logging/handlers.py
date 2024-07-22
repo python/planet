@@ -26,9 +26,14 @@ Copyright (C) 2001-2002 Vinay Sajip. All Rights Reserved.
 To use, simply 'import logging' and log away!
 """
 
-import sys, logging, socket, types, os, string, cPickle, struct, time
-
-from SocketServer import ThreadingTCPServer, StreamRequestHandler
+import logging
+import socket
+import types
+import os
+import string
+import struct
+import time
+import pickle
 
 #
 # Some constants...
@@ -164,7 +169,7 @@ class SocketHandler(logging.Handler):
         Pickles the record in binary format with a length prefix, and
         returns it ready for transmission across the socket.
         """
-        s = cPickle.dumps(record.__dict__, 1)
+        s = pickle.dumps(record.__dict__, 1)
         #n = len(s)
         #slen = "%c%c" % ((n >> 8) & 0xFF, n & 0xFF)
         slen = struct.pack(">L", len(s))
@@ -516,8 +521,8 @@ class NTEventLogHandler(logging.Handler):
                 logging.CRITICAL: win32evtlog.EVENTLOG_ERROR_TYPE,
          }
         except ImportError:
-            print "The Python Win32 extensions for NT (service, event "\
-                        "logging) appear not to be available."
+            print("The Python Win32 extensions for NT (service, event "\
+                        "logging) appear not to be available.")
             self._welu = None
 
     def getMessageID(self, record):
@@ -595,7 +600,7 @@ class HTTPHandler(logging.Handler):
         logging.Handler.__init__(self)
         method = string.upper(method)
         if method not in ["GET", "POST"]:
-            raise ValueError, "method must be GET or POST"
+            raise ValueError("method must be GET or POST")
         self.host = host
         self.url = url
         self.method = method

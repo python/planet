@@ -26,10 +26,15 @@ Copyright (C) 2001-2002 Vinay Sajip. All Rights Reserved.
 To use, simply 'import logging' and log away!
 """
 
-import sys, logging, logging.handlers, string, thread, threading, socket, struct, os
-
-from SocketServer import ThreadingTCPServer, StreamRequestHandler
-
+import logging
+import logging.handlers
+import os
+import socket
+import string
+import struct
+import sys
+from socketserver import ThreadingTCPServer, StreamRequestHandler
+import threading
 
 DEFAULT_LOGGING_CONFIG_PORT = 9030
 if sys.platform == "win32":
@@ -57,9 +62,9 @@ def fileConfig(fname, defaults=None):
     rather than a filename, in which case the file-like object will be read
     using readfp.
     """
-    import ConfigParser
+    import configparser
 
-    cp = ConfigParser.ConfigParser(defaults)
+    cp = configparser.ConfigParser(defaults)
     if hasattr(cp, 'readfp') and hasattr(fname, 'readline'):
         cp.readfp(fname)
     else:
@@ -106,7 +111,7 @@ def fileConfig(fname, defaults=None):
                     klass = eval(klass, vars(logging))
                     args = cp.get(sectname, "args")
                     args = eval(args, vars(logging))
-                    h = apply(klass, args)
+                    h = klass(*args)
                     if "level" in opts:
                         level = cp.get(sectname, "level")
                         h.setLevel(logging._levelNames[level])
@@ -201,8 +206,8 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
     and which you can join() when appropriate. To stop the server, call
     stopListening().
     """
-    if not thread:
-        raise NotImplementedError, "listen() needs threading to work"
+    if not threading:
+        raise NotImplementedError("listen() needs threading to work")
 
     class ConfigStreamHandler(StreamRequestHandler):
         """
@@ -239,8 +244,8 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                     f.close()
                     fileConfig(file)
                     os.remove(file)
-            except socket.error, e:
-                if type(e.args) != types.TupleType:
+            except socket.error as e:
+                if type(e.args) != tuple:
                     raise
                 else:
                     errcode = e.args[0]

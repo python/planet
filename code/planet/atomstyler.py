@@ -1,7 +1,7 @@
 from xml.dom import minidom, Node
-from urlparse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse
 from xml.parsers.expat import ExpatError
-from htmlentitydefs import name2codepoint
+from html.entities import name2codepoint
 import re
 
 # select and apply an xml:base for this entry
@@ -75,20 +75,20 @@ def retype(parent):
         elif len(node.childNodes)==1:
 
           # replace html entity defs with utf-8
-          chunks=re.split('&(\w+);', node.childNodes[0].nodeValue)
+          chunks=re.split(r'&(\w+);', node.childNodes[0].nodeValue)
           for i in range(1,len(chunks),2):
              if chunks[i] in ['amp', 'lt', 'gt', 'apos', 'quot']:
                chunks[i] ='&' + chunks[i] +';'
              elif chunks[i] in name2codepoint:
-               chunks[i]=unichr(name2codepoint[chunks[i]])
+               chunks[i] = chr(name2codepoint[chunks[i]])
              else:
                chunks[i]='&' + chunks[i] + ';'
-          text = u"".join(chunks)
+          text = "".join(chunks)
 
           try:
             # see if the resulting text is a well-formed XML fragment
             div = '<div xmlns="http://www.w3.org/1999/xhtml">%s</div>'
-            data = minidom.parseString((div % text.encode('utf-8')))
+            data = minidom.parseString(div % text.encode('utf-8'))
 
             if text.find('<') < 0:
               # plain text

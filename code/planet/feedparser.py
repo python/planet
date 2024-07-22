@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Universal feed parser
 
 Handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds
@@ -9,6 +9,8 @@ Visit http://feedparser.org/docs/ for the latest documentation
 Required: Python 2.1 or later
 Recommended: Python 2.3 or later
 Recommended: CJKCodecs and iconv_codec <http://cjkpython.i18n.org/>
+
+TODO: py2->3 conversion
 """
 
 __version__ = "4.1"# + "$Revision: 1.92 $"[11:15] + "-cvs"
@@ -696,7 +698,7 @@ class _FeedParserMixin:
             if element in self.can_contain_dangerous_markup:
                 output = _sanitizeHTML(output, self.encoding)
 
-        if self.encoding and type(output) != type(u''):
+        if self.encoding and type(output) != type(''):
             try:
                 output = unicode(output, self.encoding)
             except:
@@ -704,15 +706,15 @@ class _FeedParserMixin:
 
         # address common error where people take data that is already
         # utf-8, presume that it is iso-8859-1, and re-encode it.
-        if self.encoding=='utf-8' and type(output) == type(u''):
+        if self.encoding=='utf-8' and type(output) == type(''):
             try:
                 output = unicode(output.encode('iso-8859-1'), 'utf-8')
             except:
                 pass
 
         # map win-1252 extensions to the proper code points
-        if type(output) == type(u''):
-            output = u''.join([c in cp1252 and cp1252[c] or c for c in output])
+        if type(output) == type(''):
+            output = ''.join([c in cp1252 and cp1252[c] or c for c in output])
 
         # categories/tags/keywords/whatever are handled in _end_category
         if element == 'category':
@@ -1505,7 +1507,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
         data = re.sub(r'<([^<\s]+?)\s*/>', self._shorttag_replace, data) 
         data = data.replace('&#39;', "'")
         data = data.replace('&#34;', '"')
-        if self.encoding and type(data) == type(u''):
+        if self.encoding and type(data) == type(''):
             data = data.encode(self.encoding)
         sgmllib.SGMLParser.feed(self, data)
         sgmllib.SGMLParser.close(self)
@@ -1524,10 +1526,10 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
         uattrs = []
         # thanks to Kevin Marks for this breathtaking hack to deal with (valid) high-bit attribute values in UTF-8 feeds
         for key, value in attrs:
-            if type(value) != type(u''):
+            if type(value) != type(''):
                 value = unicode(value, self.encoding)
             uattrs.append((unicode(key, self.encoding), value))
-        strattrs = u''.join([u' %s="%s"' % (key, value) for key, value in uattrs]).encode(self.encoding)
+        strattrs = ''.join([' %s="%s"' % (key, value) for key, value in uattrs]).encode(self.encoding)
         if tag in self.elements_no_end_tag:
             self.pieces.append('<%(tag)s%(strattrs)s />' % locals())
         else:
@@ -1750,7 +1752,7 @@ def _sanitizeHTML(htmlSource, encoding):
             except:
                 pass
         if _tidy:
-            utf8 = type(data) == type(u'')
+            utf8 = type(data) == type('')
             if utf8:
                 data = data.encode('utf-8')
             data = _tidy(data, output_xhtml=1, numeric_entities=1, wrap=0, char_encoding="utf8")
@@ -2025,17 +2027,17 @@ def _parse_date_iso8601(dateString):
 registerDateHandler(_parse_date_iso8601)
     
 # 8-bit date handling routines written by ytrewq1.
-_korean_year  = u'\ub144' # b3e2 in euc-kr
-_korean_month = u'\uc6d4' # bff9 in euc-kr
-_korean_day   = u'\uc77c' # c0cf in euc-kr
-_korean_am    = u'\uc624\uc804' # bfc0 c0fc in euc-kr
-_korean_pm    = u'\uc624\ud6c4' # bfc0 c8c4 in euc-kr
+_korean_year  = '\ub144' # b3e2 in euc-kr
+_korean_month = '\uc6d4' # bff9 in euc-kr
+_korean_day   = '\uc77c' # c0cf in euc-kr
+_korean_am    = '\uc624\uc804' # bfc0 c0fc in euc-kr
+_korean_pm    = '\uc624\ud6c4' # bfc0 c8c4 in euc-kr
 
 _korean_onblog_date_re = \
-    re.compile('(\d{4})%s\s+(\d{2})%s\s+(\d{2})%s\s+(\d{2}):(\d{2}):(\d{2})' % \
+    re.compile(r'(\d{4})%s\s+(\d{2})%s\s+(\d{2})%s\s+(\d{2}):(\d{2}):(\d{2})' % \
                (_korean_year, _korean_month, _korean_day))
 _korean_nate_date_re = \
-    re.compile(u'(\d{4})-(\d{2})-(\d{2})\s+(%s|%s)\s+(\d{,2}):(\d{,2}):(\d{,2})' % \
+    re.compile(r'(\d{4})-(\d{2})-(\d{2})\s+(%s|%s)\s+(\d{,2}):(\d{,2}):(\d{,2})' % \
                (_korean_am, _korean_pm))
 def _parse_date_onblog(dateString):
     '''Parse a string according to the OnBlog 8-bit date format'''
@@ -2069,7 +2071,7 @@ def _parse_date_nate(dateString):
 registerDateHandler(_parse_date_nate)
 
 _mssql_date_re = \
-    re.compile('(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})(\.\d+)?')
+    re.compile(r'(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})(\.\d+)?')
 def _parse_date_mssql(dateString):
     '''Parse a string according to the MS SQL date format'''
     m = _mssql_date_re.match(dateString)
@@ -2085,40 +2087,40 @@ registerDateHandler(_parse_date_mssql)
 # Unicode strings for Greek date strings
 _greek_months = \
   { \
-   u'\u0399\u03b1\u03bd': u'Jan',       # c9e1ed in iso-8859-7
-   u'\u03a6\u03b5\u03b2': u'Feb',       # d6e5e2 in iso-8859-7
-   u'\u039c\u03ac\u03ce': u'Mar',       # ccdcfe in iso-8859-7
-   u'\u039c\u03b1\u03ce': u'Mar',       # cce1fe in iso-8859-7
-   u'\u0391\u03c0\u03c1': u'Apr',       # c1f0f1 in iso-8859-7
-   u'\u039c\u03ac\u03b9': u'May',       # ccdce9 in iso-8859-7
-   u'\u039c\u03b1\u03ca': u'May',       # cce1fa in iso-8859-7
-   u'\u039c\u03b1\u03b9': u'May',       # cce1e9 in iso-8859-7
-   u'\u0399\u03bf\u03cd\u03bd': u'Jun', # c9effded in iso-8859-7
-   u'\u0399\u03bf\u03bd': u'Jun',       # c9efed in iso-8859-7
-   u'\u0399\u03bf\u03cd\u03bb': u'Jul', # c9effdeb in iso-8859-7
-   u'\u0399\u03bf\u03bb': u'Jul',       # c9f9eb in iso-8859-7
-   u'\u0391\u03cd\u03b3': u'Aug',       # c1fde3 in iso-8859-7
-   u'\u0391\u03c5\u03b3': u'Aug',       # c1f5e3 in iso-8859-7
-   u'\u03a3\u03b5\u03c0': u'Sep',       # d3e5f0 in iso-8859-7
-   u'\u039f\u03ba\u03c4': u'Oct',       # cfeaf4 in iso-8859-7
-   u'\u039d\u03bf\u03ad': u'Nov',       # cdefdd in iso-8859-7
-   u'\u039d\u03bf\u03b5': u'Nov',       # cdefe5 in iso-8859-7
-   u'\u0394\u03b5\u03ba': u'Dec',       # c4e5ea in iso-8859-7
+   '\u0399\u03b1\u03bd': 'Jan',       # c9e1ed in iso-8859-7
+   '\u03a6\u03b5\u03b2': 'Feb',       # d6e5e2 in iso-8859-7
+   '\u039c\u03ac\u03ce': 'Mar',       # ccdcfe in iso-8859-7
+   '\u039c\u03b1\u03ce': 'Mar',       # cce1fe in iso-8859-7
+   '\u0391\u03c0\u03c1': 'Apr',       # c1f0f1 in iso-8859-7
+   '\u039c\u03ac\u03b9': 'May',       # ccdce9 in iso-8859-7
+   '\u039c\u03b1\u03ca': 'May',       # cce1fa in iso-8859-7
+   '\u039c\u03b1\u03b9': 'May',       # cce1e9 in iso-8859-7
+   '\u0399\u03bf\u03cd\u03bd': 'Jun', # c9effded in iso-8859-7
+   '\u0399\u03bf\u03bd': 'Jun',       # c9efed in iso-8859-7
+   '\u0399\u03bf\u03cd\u03bb': 'Jul', # c9effdeb in iso-8859-7
+   '\u0399\u03bf\u03bb': 'Jul',       # c9f9eb in iso-8859-7
+   '\u0391\u03cd\u03b3': 'Aug',       # c1fde3 in iso-8859-7
+   '\u0391\u03c5\u03b3': 'Aug',       # c1f5e3 in iso-8859-7
+   '\u03a3\u03b5\u03c0': 'Sep',       # d3e5f0 in iso-8859-7
+   '\u039f\u03ba\u03c4': 'Oct',       # cfeaf4 in iso-8859-7
+   '\u039d\u03bf\u03ad': 'Nov',       # cdefdd in iso-8859-7
+   '\u039d\u03bf\u03b5': 'Nov',       # cdefe5 in iso-8859-7
+   '\u0394\u03b5\u03ba': 'Dec',       # c4e5ea in iso-8859-7
   }
 
 _greek_wdays = \
   { \
-   u'\u039a\u03c5\u03c1': u'Sun', # caf5f1 in iso-8859-7
-   u'\u0394\u03b5\u03c5': u'Mon', # c4e5f5 in iso-8859-7
-   u'\u03a4\u03c1\u03b9': u'Tue', # d4f1e9 in iso-8859-7
-   u'\u03a4\u03b5\u03c4': u'Wed', # d4e5f4 in iso-8859-7
-   u'\u03a0\u03b5\u03bc': u'Thu', # d0e5ec in iso-8859-7
-   u'\u03a0\u03b1\u03c1': u'Fri', # d0e1f1 in iso-8859-7
-   u'\u03a3\u03b1\u03b2': u'Sat', # d3e1e2 in iso-8859-7   
+   '\u039a\u03c5\u03c1': 'Sun', # caf5f1 in iso-8859-7
+   '\u0394\u03b5\u03c5': 'Mon', # c4e5f5 in iso-8859-7
+   '\u03a4\u03c1\u03b9': 'Tue', # d4f1e9 in iso-8859-7
+   '\u03a4\u03b5\u03c4': 'Wed', # d4e5f4 in iso-8859-7
+   '\u03a0\u03b5\u03bc': 'Thu', # d0e5ec in iso-8859-7
+   '\u03a0\u03b1\u03c1': 'Fri', # d0e1f1 in iso-8859-7
+   '\u03a3\u03b1\u03b2': 'Sat', # d3e1e2 in iso-8859-7   
   }
 
 _greek_date_format_re = \
-    re.compile(u'([^,]+),\s+(\d{2})\s+([^\s]+)\s+(\d{4})\s+(\d{2}):(\d{2}):(\d{2})\s+([^\s]+)')
+    re.compile(r'([^,]+),\s+(\d{2})\s+([^\s]+)\s+(\d{4})\s+(\d{2}):(\d{2}):(\d{2})\s+([^\s]+)')
 
 def _parse_date_greek(dateString):
     '''Parse a string according to a Greek 8-bit date format.'''
@@ -2140,22 +2142,22 @@ registerDateHandler(_parse_date_greek)
 # Unicode strings for Hungarian date strings
 _hungarian_months = \
   { \
-    u'janu\u00e1r':   u'01',  # e1 in iso-8859-2
-    u'febru\u00e1ri': u'02',  # e1 in iso-8859-2
-    u'm\u00e1rcius':  u'03',  # e1 in iso-8859-2
-    u'\u00e1prilis':  u'04',  # e1 in iso-8859-2
-    u'm\u00e1ujus':   u'05',  # e1 in iso-8859-2
-    u'j\u00fanius':   u'06',  # fa in iso-8859-2
-    u'j\u00falius':   u'07',  # fa in iso-8859-2
-    u'augusztus':     u'08',
-    u'szeptember':    u'09',
-    u'okt\u00f3ber':  u'10',  # f3 in iso-8859-2
-    u'november':      u'11',
-    u'december':      u'12',
+    'janu\u00e1r':   '01',  # e1 in iso-8859-2
+    'febru\u00e1ri': '02',  # e1 in iso-8859-2
+    'm\u00e1rcius':  '03',  # e1 in iso-8859-2
+    '\u00e1prilis':  '04',  # e1 in iso-8859-2
+    'm\u00e1ujus':   '05',  # e1 in iso-8859-2
+    'j\u00fanius':   '06',  # fa in iso-8859-2
+    'j\u00falius':   '07',  # fa in iso-8859-2
+    'augusztus':     '08',
+    'szeptember':    '09',
+    'okt\u00f3ber':  '10',  # f3 in iso-8859-2
+    'november':      '11',
+    'december':      '12',
   }
 
 _hungarian_date_format_re = \
-  re.compile(u'(\d{4})-([^-]+)-(\d{,2})T(\d{,2}):(\d{2})((\+|-)(\d{,2}:\d{2}))')
+  re.compile(r'(\d{4})-([^-]+)-(\d{,2})T(\d{,2}):(\d{2})((\+|-)(\d{,2}:\d{2}))')
 
 def _parse_date_hungarian(dateString):
     '''Parse a string according to a Hungarian 8-bit date format.'''
@@ -2260,14 +2262,14 @@ def _parse_date_w3dtf(dateString):
             return -offset
         return offset
 
-    __date_re = ('(?P<year>\d\d\d\d)'
+    __date_re = (r'(?P<year>\d\d\d\d)'
                  '(?:(?P<dsep>-|)'
-                 '(?:(?P<julian>\d\d\d)'
-                 '|(?P<month>\d\d)(?:(?P=dsep)(?P<day>\d\d))?))?')
-    __tzd_re = '(?P<tzd>[-+](?P<tzdhours>\d\d)(?::?(?P<tzdminutes>\d\d))|Z)'
+                 r'(?:(?P<julian>\d\d\d)'
+                 r'|(?P<month>\d\d)(?:(?P=dsep)(?P<day>\d\d))?))?')
+    __tzd_re = r'(?P<tzd>[-+](?P<tzdhours>\d\d)(?::?(?P<tzdminutes>\d\d))|Z)'
     __tzd_rx = re.compile(__tzd_re)
-    __time_re = ('(?P<hours>\d\d)(?P<tsep>:|)(?P<minutes>\d\d)'
-                 '(?:(?P=tsep)(?P<seconds>\d\d(?:[.,]\d+)?))?'
+    __time_re = (r'(?P<hours>\d\d)(?P<tsep>:|)(?P<minutes>\d\d)'
+                 r'(?:(?P=tsep)(?P<seconds>\d\d(?:[.,]\d+)?))?'
                  + __tzd_re)
     __datetime_re = '%s(?:T%s)?' % (__date_re, __time_re)
     __datetime_rx = re.compile(__datetime_re)
@@ -2428,7 +2430,7 @@ def _getCharacterEncoding(http_headers, xml_data):
         else:
             # ASCII-compatible
             pass
-        xml_encoding_match = re.compile('^<\?.*encoding=[\'"](.*?)[\'"].*\?>').match(xml_data)
+        xml_encoding_match = re.compile('^<\\?.*encoding=[\'"](.*?)[\'"].*\\?>').match(xml_data)
     except:
         xml_encoding_match = None
     if xml_encoding_match:
@@ -2499,12 +2501,12 @@ def _toUTF8(data, encoding):
         data = data[4:]
     newdata = unicode(data, encoding)
     if _debug: sys.stderr.write('successfully converted %s data to unicode\n' % encoding)
-    declmatch = re.compile('^<\?xml[^>]*?>')
+    declmatch = re.compile(r'^<\?xml[^>]*?>')
     newdecl = '''<?xml version='1.0' encoding='utf-8'?>'''
     if declmatch.search(newdata):
         newdata = declmatch.sub(newdecl, newdata)
     else:
-        newdata = newdecl + u'\n' + newdata
+        newdata = newdecl + '\n' + newdata
     return newdata.encode('utf-8')
 
 def _stripDoctype(data):
@@ -2708,18 +2710,18 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
 
 if __name__ == '__main__':
     if not sys.argv[1:]:
-        print __doc__
+        print(__doc__)
         sys.exit(0)
     else:
         urls = sys.argv[1:]
     zopeCompatibilityHack()
     from pprint import pprint
     for url in urls:
-        print url
-        print
+        print(url)
+        print()
         result = parse(url)
         pprint(result)
-        print
+        print()
 
 #REVISION HISTORY
 #1.0 - 9/27/2002 - MAP - fixed namespace processing on prefixed RSS 2.0 elements,

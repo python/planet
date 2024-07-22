@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import ConfigParser
@@ -19,7 +19,7 @@ with open(filename, 'wb') as fd:
     if oconfig._defaults:
         fd.write("[%s]\n" % DEFAULTSECT)
         for (key, value) in oconfig._defaults.items():
-            fd.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
+            fd.write("{} = {}\n".format(key, str(value).replace('\n', '\n\t')))
         fd.write("\n")
     
     result = {}

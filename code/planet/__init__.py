@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python3
 """Planet aggregator library.
 
 This package is a library for developing web sites or software that
@@ -18,7 +17,6 @@ import cache
 import feedparser
 import sanitize
 import htmltmpl
-import sgmllib
 try:
     import logging
 except:
@@ -29,10 +27,11 @@ __all__ = ("cache", "feedparser", "htmltmpl", "logging",
            "Planet", "Channel", "NewsItem")
 
 
+from html.parser import HTMLParser
 import os
-import md5
+from hashlib import md5
 import time
-import dbhash
+import dbm
 import re
 
 try: 
@@ -74,15 +73,18 @@ DATE_FORMAT     = "%B %d, %Y %I:%M %p"
 NEW_DATE_FORMAT = "%B %d, %Y"
 ACTIVITY_THRESHOLD = 0
 
-class stripHtml(sgmllib.SGMLParser):
+
+class stripHtml(HTMLParser):
     "remove all tags from the data"
-    def __init__(self, data):
-        sgmllib.SGMLParser.__init__(self)
-        self.result=''
-        self.feed(data)
-        self.close()
+    def __init__(self):
+        super().__init__()
+        self.result = []
+
     def handle_data(self, data):
-        if data: self.result+=data
+        self.result.append(data)
+
+    def get_data(self):
+        return "".join(self.result)
 
 def template_info(item, date_format):
     """Produce a dictionary of template information."""
@@ -504,7 +506,7 @@ class Channel(cache.CachedInfo):
         if not os.path.isdir(planet.cache_directory):
             os.makedirs(planet.cache_directory)
         cache_filename = cache.filename(planet.cache_directory, url)
-        cache_file = dbhash.open(cache_filename, "c", 0666)
+        cache_file = dbm.open(cache_filename, "c", 0o666)
 
         cache.CachedInfo.__init__(self, cache_file, url, root=1)
 
@@ -695,7 +697,7 @@ class Channel(cache.CachedInfo):
                     self.set_as_string(key + "_width", str(feed[key].width))
                 if feed[key].has_key("height"):
                     self.set_as_string(key + "_height", str(feed[key].height))
-            elif isinstance(feed[key], (str, unicode)):
+            elif isinstance(feed[key], str):
                 # String fields
                 try:
                     detail = key + '_detail'
@@ -890,7 +892,7 @@ class NewsItem(cache.CachedInfo):
                         self.set_as_string(key + "_language", item.language)
                     value += cache.utf8(item.value)
                 self.set_as_string(key, value)
-            elif isinstance(entry[key], (str, unicode)):
+            elif isinstance(entry[key], str):
                 # String fields
                 try:
                     detail = key + '_detail'

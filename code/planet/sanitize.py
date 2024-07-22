@@ -1,5 +1,7 @@
 """
 sanitize: bringing sanitiy to world of messed-up data
+
+TODO: py2->3
 """
 
 __author__ = ["Mark Pilgrim <http://diveintomark.org/>", 
@@ -7,6 +9,8 @@ __author__ = ["Mark Pilgrim <http://diveintomark.org/>",
 __contributors__ = ["Sam Ruby <http://intertwingly.net/>"]
 __license__ = "BSD"
 __version__ = "0.25"
+
+import sys
 
 _debug = 0
 
@@ -19,7 +23,8 @@ TIDY_MARKUP = 0
 # if TIDY_MARKUP = 1
 PREFERRED_TIDY_INTERFACES = ["uTidy", "mxTidy"]
 
-import sgmllib, re
+import re
+from html.parser import HTMLParser
 
 # chardet library auto-detects character encodings
 # Download from http://chardet.feedparser.org/
@@ -39,7 +44,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
       'img', 'input', 'isindex', 'link', 'meta', 'param']
     
     _r_barebang = re.compile(r'<!((?!DOCTYPE|--|\[))', re.IGNORECASE)
-    _r_bareamp = re.compile("&(?!#\d+;|#x[0-9a-fA-F]+;|\w+;)")
+    _r_bareamp = re.compile(r"&(?!#\d+;|#x[0-9a-fA-F]+;|\w+;)")
     _r_shorttag = re.compile(r'<([^<\s]+?)\s*/>')
     
     def __init__(self, encoding):
@@ -62,7 +67,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
         data = self._r_barebang.sub(r'&lt;!\1', data)
         data = self._r_bareamp.sub("&amp;", data)
         data = self._r_shorttag.sub(self._shorttag_replace, data) 
-        if self.encoding and type(data) == type(u''):
+        if self.encoding and type(data) == str:
             data = data.encode(self.encoding)
         sgmllib.SGMLParser.feed(self, data)
 
@@ -80,10 +85,10 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
         uattrs = []
         # thanks to Kevin Marks for this breathtaking hack to deal with (valid) high-bit attribute values in UTF-8 feeds
         for key, value in attrs:
-            if type(value) != type(u''):
-                value = unicode(value, self.encoding)
-            uattrs.append((unicode(key, self.encoding), value))
-        strattrs = u''.join([u' %s="%s"' % (key, value) for key, value in uattrs]).encode(self.encoding)
+            if type(value) != str:
+                value = str(value, self.encoding)
+            uattrs.append((str(key, self.encoding), value))
+        strattrs = ''.join([f' {key}="{value}"' for key, value in uattrs]).encode(self.encoding)
         if tag in self.elements_no_end_tag:
             self.pieces.append('<%(tag)s%(strattrs)s />' % locals())
         else:
@@ -254,12 +259,12 @@ def HTML(htmlSource, encoding='utf8'):
             except:
                 pass
         if _tidy:
-            utf8 = type(data) == type(u'')
+            utf8 = type(data) == str
             if utf8:
                 data = data.encode('utf-8')
             data = _tidy(data, output_xhtml=1, numeric_entities=1, wrap=0, char_encoding="utf8")
             if utf8:
-                data = unicode(data, 'utf-8')
+                data = str(data, 'utf-8')
             if data.count('<body'):
                 data = data.split('<body', 1)[1]
                 if data.count('>'):
@@ -339,7 +344,7 @@ def characters(text, isXML=False, guess=None):
             if encoding == 'ebcdic':
                 return _ebcdic_to_ascii(text)
             try:
-                return unicode(text, encoding)
+                return str(text, encoding)
             except UnicodeDecodeError:
                 pass
             _triedEncodings.append(encoding)

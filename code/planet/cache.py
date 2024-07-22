@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python3
 """Item cache.
 
 Between runs of Planet we need somewhere to store the feed information
@@ -198,7 +197,7 @@ class CachedInfo:
         """Return the key as a string value."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise KeyError(key)
 
         return self._value[key]
 
@@ -218,7 +217,7 @@ class CachedInfo:
         """Return the key as a date value."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise KeyError(key)
 
         value = self._value[key]
         return tuple([ int(i) for i in value.split(" ") ])
@@ -237,7 +236,7 @@ class CachedInfo:
         """Return the key as the null value."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise KeyError(key)
 
         return None
 
@@ -245,7 +244,7 @@ class CachedInfo:
         """Delete the given key."""
         key = key.replace(" ", "_")
         if not self.has_key(key):
-            raise KeyError, key
+            raise KeyError(key)
 
         del(self._value[key])
         del(self._type[key])
@@ -276,7 +275,7 @@ class CachedInfo:
         if self.has_key(key):
             return self.get(key)
         else:
-            raise AttributeError, key
+            raise AttributeError(key)
 
 
 def filename(directory, filename):
@@ -294,13 +293,13 @@ def filename(directory, filename):
 
 def utf8(value):
     """Return the value as a UTF-8 string."""
-    if type(value) == type(u''):
+    if type(value) == type(''):
         return value.encode("utf-8")
     else:
         try:
-            return unicode(value, "utf-8").encode("utf-8")
+            return str(value, "utf-8").encode("utf-8")
         except UnicodeError:
             try:
-                return unicode(value, "iso-8859-1").encode("utf-8")
+                return str(value, "iso-8859-1").encode("utf-8")
             except UnicodeError:
-                return unicode(value, "ascii", "replace").encode("utf-8")
+                return str(value, "ascii", "replace").encode("utf-8")
