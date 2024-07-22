@@ -12,12 +12,11 @@ that the rest of the code can take the persistance for granted.
 import os
 import re
 
-
 # Regular expressions to sanitise cache filenames
-re_url_scheme    = re.compile(r'^[^:]*://')
-re_slash         = re.compile(r'[?/]+')
-re_initial_cruft = re.compile(r'^[,.]*')
-re_final_cruft   = re.compile(r'[,.]*$')
+re_url_scheme = re.compile(r"^[^:]*://")
+re_slash = re.compile(r"[?/]+")
+re_initial_cruft = re.compile(r"^[,.]*")
+re_final_cruft = re.compile(r"[,.]*$")
 
 
 class CachedInfo:
@@ -32,9 +31,10 @@ class CachedInfo:
     and implement get_FIELD and set_FIELD functions which will be
     automatically called.
     """
+
     STRING = "string"
-    DATE   = "date"
-    NULL   = "null"
+    DATE = "date"
+    NULL = "null"
 
     def __init__(self, cache, id_, root=0):
         self._type = {}
@@ -83,8 +83,8 @@ class CachedInfo:
             if not self._cached[key]:
                 if self._cache.has_key(cache_key):
                     # Non-cached keys need to be cleared
-                    del(self._cache[cache_key])
-                    del(self._cache[cache_key + " type"])
+                    del self._cache[cache_key]
+                    del self._cache[cache_key + " type"]
                 continue
 
             keys.append(key)
@@ -109,14 +109,14 @@ class CachedInfo:
 
         if self._cache.has_key(keys_key):
             keys = self._cache[keys_key].split(" ")
-            del(self._cache[keys_key])
+            del self._cache[keys_key]
         else:
             return
 
         for key in keys:
             cache_key = self.cache_key(key)
-            del(self._cache[cache_key])
-            del(self._cache[cache_key + " type"])
+            del self._cache[cache_key]
+            del self._cache[cache_key + " type"]
 
         if sync:
             self._cache.sync()
@@ -206,7 +206,7 @@ class CachedInfo:
 
         The date should be a 9-item tuple as returned by time.gmtime().
         """
-        value = " ".join([ str(s) for s in value ])
+        value = " ".join([str(s) for s in value])
 
         key = key.replace(" ", "_")
         self._value[key] = value
@@ -220,7 +220,7 @@ class CachedInfo:
             raise KeyError(key)
 
         value = self._value[key]
-        return tuple([ int(i) for i in value.split(" ") ])
+        return tuple([int(i) for i in value.split(" ")])
 
     def set_as_null(self, key, value, cached=1):
         """Set the key to the null value.
@@ -238,7 +238,6 @@ class CachedInfo:
         if not self.has_key(key):
             raise KeyError(key)
 
-        return None
 
     def del_key(self, key):
         """Delete the given key."""
@@ -246,9 +245,9 @@ class CachedInfo:
         if not self.has_key(key):
             raise KeyError(key)
 
-        del(self._value[key])
-        del(self._type[key])
-        del(self._cached[key])
+        del self._value[key]
+        del self._type[key]
+        del self._cached[key]
 
     def keys(self):
         """Return the list of cached keys."""
@@ -260,10 +259,10 @@ class CachedInfo:
 
     # Special methods
     __contains__ = has_key
-    __setitem__  = set_as_string
-    __getitem__  = get
-    __delitem__  = del_key
-    __delattr__  = del_key
+    __setitem__ = set_as_string
+    __getitem__ = get
+    __delitem__ = del_key
+    __delattr__ = del_key
 
     def __setattr__(self, key, value):
         if key.startswith("_"):
@@ -291,9 +290,10 @@ def filename(directory, filename):
 
     return os.path.join(directory, filename)
 
+
 def utf8(value):
     """Return the value as a UTF-8 string."""
-    if type(value) == type(''):
+    if type(value) == str:
         return value.encode("utf-8")
     else:
         try:

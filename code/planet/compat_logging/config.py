@@ -14,8 +14,7 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-"""
-Logging package for Python. Based on PEP 282 and comments thereto in
+"""Logging package for Python. Based on PEP 282 and comments thereto in
 comp.lang.python, and influenced by Apache's log4j system.
 
 Should work under Python versions >= 1.5.2, except that source line
@@ -29,18 +28,17 @@ To use, simply 'import logging' and log away!
 import logging
 import logging.handlers
 import os
-import socket
 import string
 import struct
 import sys
-from socketserver import ThreadingTCPServer, StreamRequestHandler
 import threading
+from socketserver import StreamRequestHandler, ThreadingTCPServer
 
 DEFAULT_LOGGING_CONFIG_PORT = 9030
 if sys.platform == "win32":
-    RESET_ERROR = 10054   #WSAECONNRESET
+    RESET_ERROR = 10054  # WSAECONNRESET
 else:
-    RESET_ERROR = 104     #ECONNRESET
+    RESET_ERROR = 104  # ECONNRESET
 
 #
 #   The following code implements a socket listener for on-the-fly
@@ -49,9 +47,9 @@ else:
 #   _listener holds the server object doing the listening
 _listener = None
 
+
 def fileConfig(fname, defaults=None):
-    """
-    Read the logging configuration from a ConfigParser-format file.
+    """Read the logging configuration from a ConfigParser-format file.
 
     This can be called several times from an application, allowing an end user
     the ability to select from various pre-canned configurations (if the
@@ -65,11 +63,11 @@ def fileConfig(fname, defaults=None):
     import configparser
 
     cp = configparser.ConfigParser(defaults)
-    if hasattr(cp, 'readfp') and hasattr(fname, 'readline'):
+    if hasattr(cp, "readfp") and hasattr(fname, "readline"):
         cp.readfp(fname)
     else:
         cp.read(fname)
-    #first, do the formatters...
+    # first, do the formatters...
     flist = cp.get("formatters", "keys")
     if len(flist):
         flist = string.split(flist, ",")
@@ -87,19 +85,19 @@ def fileConfig(fname, defaults=None):
                 dfs = None
             f = logging.Formatter(fs, dfs)
             formatters[form] = f
-    #next, do the handlers...
-    #critical section...
+    # next, do the handlers...
+    # critical section...
     logging._acquireLock()
     try:
         try:
-            #first, lose the existing handlers...
+            # first, lose the existing handlers...
             logging._handlers.clear()
-            #now set up the new ones...
+            # now set up the new ones...
             hlist = cp.get("handlers", "keys")
             if len(hlist):
                 hlist = string.split(hlist, ",")
                 handlers = {}
-                fixups = [] #for inter-handler references
+                fixups = []  # for inter-handler references
                 for hand in hlist:
                     sectname = "handler_%s" % hand
                     klass = cp.get(sectname, "class")
@@ -117,21 +115,21 @@ def fileConfig(fname, defaults=None):
                         h.setLevel(logging._levelNames[level])
                     if len(fmt):
                         h.setFormatter(formatters[fmt])
-                    #temporary hack for FileHandler and MemoryHandler.
+                    # temporary hack for FileHandler and MemoryHandler.
                     if klass == logging.handlers.MemoryHandler:
                         if "target" in opts:
-                            target = cp.get(sectname,"target")
+                            target = cp.get(sectname, "target")
                         else:
                             target = ""
-                        if len(target): #the target handler may not be loaded yet, so keep for later...
+                        if len(target):  # the target handler may not be loaded yet, so keep for later...
                             fixups.append((h, target))
                     handlers[hand] = h
-                #now all handlers are loaded, fixup inter-handler references...
+                # now all handlers are loaded, fixup inter-handler references...
                 for fixup in fixups:
                     h = fixup[0]
                     t = fixup[1]
                     h.setTarget(handlers[t])
-            #at last, the loggers...first the root...
+            # at last, the loggers...first the root...
             llist = cp.get("loggers", "keys")
             llist = string.split(llist, ",")
             llist.remove("root")
@@ -149,17 +147,17 @@ def fileConfig(fname, defaults=None):
                 hlist = string.split(hlist, ",")
                 for hand in hlist:
                     log.addHandler(handlers[hand])
-            #and now the others...
-            #we don't want to lose the existing loggers,
-            #since other threads may have pointers to them.
-            #existing is set to contain all existing loggers,
-            #and as we go through the new configuration we
-            #remove any which are configured. At the end,
-            #what's left in existing is the set of loggers
-            #which were in the previous configuration but
-            #which are not in the new configuration.
+            # and now the others...
+            # we don't want to lose the existing loggers,
+            # since other threads may have pointers to them.
+            # existing is set to contain all existing loggers,
+            # and as we go through the new configuration we
+            # remove any which are configured. At the end,
+            # what's left in existing is the set of loggers
+            # which were in the previous configuration but
+            # which are not in the new configuration.
             existing = root.manager.loggerDict.keys()
-            #now set up the new ones...
+            # now set up the new ones...
             for log in llist:
                 sectname = "logger_%s" % log
                 qn = cp.get(sectname, "qualname")
@@ -183,22 +181,23 @@ def fileConfig(fname, defaults=None):
                     hlist = string.split(hlist, ",")
                     for hand in hlist:
                         logger.addHandler(handlers[hand])
-            #Disable any old loggers. There's no point deleting
-            #them as other threads may continue to hold references
-            #and by disabling them, you stop them doing any logging.
+            # Disable any old loggers. There's no point deleting
+            # them as other threads may continue to hold references
+            # and by disabling them, you stop them doing any logging.
             for log in existing:
                 root.manager.loggerDict[log].disabled = 1
         except:
             import traceback
+
             ei = sys.exc_info()
             traceback.print_exception(ei[0], ei[1], ei[2], None, sys.stderr)
             del ei
     finally:
         logging._releaseLock()
 
+
 def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
-    """
-    Start up a socket server on the specified port, and listen for new
+    """Start up a socket server on the specified port, and listen for new
     configurations.
 
     These will be sent as a file suitable for processing by fileConfig().
@@ -210,21 +209,21 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
         raise NotImplementedError("listen() needs threading to work")
 
     class ConfigStreamHandler(StreamRequestHandler):
-        """
-        Handler for a logging configuration request.
+        """Handler for a logging configuration request.
 
         It expects a completely new logging configuration and uses fileConfig
         to install it.
         """
+
         def handle(self):
-            """
-            Handle a request.
+            """Handle a request.
 
             Each request is expected to be a 4-byte length,
             followed by the config file. Uses fileConfig() to do the
             grunt work.
             """
             import tempfile
+
             try:
                 conn = self.connection
                 chunk = conn.recv(4)
@@ -233,18 +232,18 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                     chunk = self.connection.recv(slen)
                     while len(chunk) < slen:
                         chunk = chunk + conn.recv(slen - len(chunk))
-                    #Apply new configuration. We'd like to be able to
-                    #create a StringIO and pass that in, but unfortunately
-                    #1.5.2 ConfigParser does not support reading file
-                    #objects, only actual files. So we create a temporary
-                    #file and remove it later.
+                    # Apply new configuration. We'd like to be able to
+                    # create a StringIO and pass that in, but unfortunately
+                    # 1.5.2 ConfigParser does not support reading file
+                    # objects, only actual files. So we create a temporary
+                    # file and remove it later.
                     file = tempfile.mktemp(".ini")
                     f = open(file, "w")
                     f.write(chunk)
                     f.close()
                     fileConfig(file)
                     os.remove(file)
-            except socket.error as e:
+            except OSError as e:
                 if type(e.args) != tuple:
                     raise
                 else:
@@ -253,14 +252,12 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                         raise
 
     class ConfigSocketReceiver(ThreadingTCPServer):
-        """
-        A simple TCP socket-based logging config receiver.
+        """A simple TCP socket-based logging config receiver.
         """
 
         allow_reuse_address = 1
 
-        def __init__(self, host='localhost', port=DEFAULT_LOGGING_CONFIG_PORT,
-                     handler=None):
+        def __init__(self, host="localhost", port=DEFAULT_LOGGING_CONFIG_PORT, handler=None):
             ThreadingTCPServer.__init__(self, (host, port), handler)
             logging._acquireLock()
             self.abort = 0
@@ -269,11 +266,10 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
 
         def serve_until_stopped(self):
             import select
+
             abort = 0
             while not abort:
-                rd, wr, ex = select.select([self.socket.fileno()],
-                                           [], [],
-                                           self.timeout)
+                rd, wr, ex = select.select([self.socket.fileno()], [], [], self.timeout)
                 if rd:
                     self.handle_request()
                 logging._acquireLock()
@@ -288,13 +284,11 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
         logging._releaseLock()
         server.serve_until_stopped()
 
-    return threading.Thread(target=serve,
-                            args=(ConfigSocketReceiver,
-                                  ConfigStreamHandler, port))
+    return threading.Thread(target=serve, args=(ConfigSocketReceiver, ConfigStreamHandler, port))
+
 
 def stopListening():
-    """
-    Stop the listening server which was created with a call to listen().
+    """Stop the listening server which was created with a call to listen().
     """
     global _listener
     if _listener:

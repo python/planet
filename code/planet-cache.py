@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-"""Planet cache tool.
+"""Planet cache tool."""
 
-"""
-
-__authors__ = [ "Scott James Remnant <scott@netsplit.com>",
-                "Jeff Waugh <jdub@perkypants.org>" ]
+__authors__ = ["Scott James Remnant <scott@netsplit.com>", "Jeff Waugh <jdub@perkypants.org>"]
 __license__ = "Python"
 
 
+import configparser
+import dbm
 import os
 import sys
 import time
-import dbm
-import configparser
 
 import planet
 
@@ -36,15 +33,17 @@ def usage():
     print(" -h, --help        Display this help message and exit")
     sys.exit(0)
 
+
 def usage_error(msg, *args):
     print(msg, " ".join(args), file=sys.stderr)
     print("Perhaps you need --help ?", file=sys.stderr)
     sys.exit(1)
 
+
 def print_keys(item, title):
     keys = item.keys()
     keys.sort()
-    key_len = max([ len(k) for k in keys ])
+    key_len = max([len(k) for k in keys])
 
     print(title + ":")
     for key in keys:
@@ -54,11 +53,12 @@ def print_keys(item, title):
             value = str(item[key])
         print("    %-*s  %s" % (key_len, key, fit_str(value, 74 - key_len)))
 
+
 def fit_str(string, length):
     if len(string) <= length:
         return string
     else:
-        return string[:length-4] + " ..."
+        return string[: length - 4] + " ..."
 
 
 if __name__ == "__main__":
@@ -100,13 +100,12 @@ if __name__ == "__main__":
             want_ids = 1
         elif arg.startswith("-"):
             usage_error("Unknown option:", arg)
+        elif cache_file is None:
+            cache_file = arg
+        elif want_ids:
+            ids.append(arg)
         else:
-            if cache_file is None:
-                cache_file = arg
-            elif want_ids:
-                ids.append(arg)
-            else:
-                usage_error("Unexpected extra argument:", arg)
+            usage_error("Unexpected extra argument:", arg)
 
     if cache_file is None:
         usage_error("Missing expected cache filename")
@@ -115,10 +114,10 @@ if __name__ == "__main__":
 
     # Open the cache file directly to get the URL it represents
     try:
-        with dbm.open(cache_file, 'r') as db:
-            url = db[b"url"].decode('utf-8')
+        with dbm.open(cache_file, "r") as db:
+            url = db[b"url"].decode("utf-8")
     except dbm.error as e:
-        print(f"{cache_file}: {str(e)}", file=sys.stderr)
+        print(f"{cache_file}: {e!s}", file=sys.stderr)
         sys.exit(1)
     except KeyError:
         print(f"{cache_file}: Probably not a cache file", file=sys.stderr)
@@ -156,7 +155,7 @@ if __name__ == "__main__":
     elif command == "keys":
         keys = {}
         for item in channel.items():
-            for key in item.keys():
+            for key in item:
                 keys[key] = 1
 
         keys = sorted(keys.keys())

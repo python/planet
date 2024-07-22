@@ -9,20 +9,18 @@ the latest version.
 Requires Python 2.1, recommends 2.3.
 """
 
-__authors__ = [ "Scott James Remnant <scott@netsplit.com>",
-                "Jeff Waugh <jdub@perkypants.org>" ]
+__authors__ = ["Scott James Remnant <scott@netsplit.com>", "Jeff Waugh <jdub@perkypants.org>"]
 __license__ = "Python"
 
 
-import os
-import sys
-import locale
-import socket
 import configparser
+import locale
+import os
+import socket
+import sys
 from urllib.parse import urljoin
 
 import planet
-
 
 # Default configuration file path
 CONFIG_FILE = "config.ini"
@@ -31,14 +29,13 @@ CONFIG_FILE = "config.ini"
 PLANET_NAME = "Unconfigured Planet"
 PLANET_LINK = "Unconfigured Planet"
 PLANET_FEED = None
-OWNER_NAME  = "Anonymous Coward"
+OWNER_NAME = "Anonymous Coward"
 OWNER_EMAIL = ""
-LOG_LEVEL   = "WARNING"
-FEED_TIMEOUT = 20 # seconds
+LOG_LEVEL = "WARNING"
+FEED_TIMEOUT = 20  # seconds
 
 # Default template file list
 TEMPLATE_FILES = "examples/basic/planet.html.tmpl"
-
 
 
 def config_get(config, section, option, default=None, raw=0, vars=None):
@@ -47,6 +44,7 @@ def config_get(config, section, option, default=None, raw=0, vars=None):
         return config.get(section, option, raw=raw, vars=None)
     else:
         return default
+
 
 def main():
     config_file = CONFIG_FILE
@@ -81,24 +79,23 @@ def main():
         sys.exit(1)
 
     # Read the [Planet] config section
-    planet_name = config_get(config, "Planet", "name",        PLANET_NAME)
-    planet_link = config_get(config, "Planet", "link",        PLANET_LINK)
-    planet_feed = config_get(config, "Planet", "feed",        PLANET_FEED)
-    owner_name  = config_get(config, "Planet", "owner_name",  OWNER_NAME)
+    planet_name = config_get(config, "Planet", "name", PLANET_NAME)
+    planet_link = config_get(config, "Planet", "link", PLANET_LINK)
+    planet_feed = config_get(config, "Planet", "feed", PLANET_FEED)
+    owner_name = config_get(config, "Planet", "owner_name", OWNER_NAME)
     owner_email = config_get(config, "Planet", "owner_email", OWNER_EMAIL)
     if verbose:
         log_level = "DEBUG"
     else:
-        log_level  = config_get(config, "Planet", "log_level", LOG_LEVEL)
-    feed_timeout   = config_get(config, "Planet", "feed_timeout", FEED_TIMEOUT)
-    template_files = config_get(config, "Planet", "template_files",
-                                TEMPLATE_FILES).split(" ")
+        log_level = config_get(config, "Planet", "log_level", LOG_LEVEL)
+    feed_timeout = config_get(config, "Planet", "feed_timeout", FEED_TIMEOUT)
+    template_files = config_get(config, "Planet", "template_files", TEMPLATE_FILES).split(" ")
 
     # Default feed to the first feed for which there is a template
     if not planet_feed:
         for template_file in template_files:
             name = os.path.splitext(os.path.basename(template_file))[0]
-            if name.find('atom')>=0 or name.find('rss')>=0:
+            if name.find("atom") >= 0 or name.find("rss") >= 0:
                 planet_feed = urljoin(planet_link, name)
                 break
 
@@ -107,7 +104,7 @@ def main():
         # The user can specify more than one locale (separated by ":") as
         # fallbacks.
         locale_ok = False
-        for user_locale in config.get("Planet", "locale").split(':'):
+        for user_locale in config.get("Planet", "locale").split(":"):
             user_locale = user_locale.strip()
             try:
                 locale.setlocale(locale.LC_ALL, user_locale)
@@ -144,10 +141,8 @@ def main():
     my_planet = planet.Planet(config)
     my_planet.run(planet_name, planet_link, template_files, offline)
 
-    my_planet.generate_all_files(template_files, planet_name,
-        planet_link, planet_feed, owner_name, owner_email)
+    my_planet.generate_all_files(template_files, planet_name, planet_link, planet_feed, owner_name, owner_email)
 
 
 if __name__ == "__main__":
     main()
-
