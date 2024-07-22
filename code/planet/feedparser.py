@@ -744,7 +744,7 @@ class _FeedParserMixin:
 
     def unknown_starttag(self, tag, attrs):
         if _debug:
-            sys.stderr.write("start %s with %s\n" % (tag, attrs))
+            sys.stderr.write(f"start {tag} with {attrs}\n")
         # normalize attrs
         attrs = [(k.lower(), v) for k, v in attrs]
         attrs = [(k, k in ("rel", "type") and v.lower() or v) for k, v in attrs]
@@ -792,7 +792,7 @@ class _FeedParserMixin:
             # This will horribly munge inline content with non-empty qnames,
             # but nobody actually does that, so I'm not fixing it.
             tag = tag.split(":")[-1]
-            return self.handle_data("<%s%s>" % (tag, self.strattrs(attrs)), escape=0)
+            return self.handle_data(f"<{tag}{self.strattrs(attrs)}>", escape=0)
 
         # match namespaces
         if tag.find(":") != -1:
@@ -971,7 +971,7 @@ class _FeedParserMixin:
         return data
 
     def strattrs(self, attrs):
-        return "".join([' %s="%s"' % (t[0], _xmlescape(t[1], {'"': "&quot;"})) for t in attrs])
+        return "".join([' {}="{}"'.format(t[0], _xmlescape(t[1], {'"': "&quot;"})) for t in attrs])
 
     def push(self, element, expectingText):
         self.elementstack.append([element, expectingText, []])
@@ -1388,7 +1388,7 @@ class _FeedParserMixin:
             name = detail.get("name")
             email = detail.get("email")
             if name and email:
-                context[key] = "%s (%s)" % (name, email)
+                context[key] = f"{name} ({email})"
             elif name:
                 context[key] = name
             elif email:
@@ -1956,7 +1956,7 @@ class _BaseHTMLProcessor(HTMLParser):
             if type(value) != str:
                 value = str(value, self.encoding)
             uattrs.append((str(key, self.encoding), value))
-        strattrs = "".join([' %s="%s"' % (key, value) for key, value in uattrs]).encode(self.encoding)
+        strattrs = "".join([f' {key}="{value}"' for key, value in uattrs]).encode(self.encoding)
         if tag in self.elements_no_end_tag:
             self.pieces.append("<%(tag)s%(strattrs)s />" % locals())
         else:
@@ -2438,7 +2438,7 @@ def _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, h
             if realhost:
                 user_passwd, realhost = urllib.splituser(realhost)
                 if user_passwd:
-                    url_file_stream_or_string = "%s://%s%s" % (urltype, realhost, rest)
+                    url_file_stream_or_string = f"{urltype}://{realhost}{rest}"
                     auth = base64.encodestring(user_passwd).strip()
         # try to open with urllib2 (to use optional headers)
         request = urllib.request.Request(url_file_stream_or_string)
@@ -2638,10 +2638,10 @@ _korean_am = "\uc624\uc804"  # bfc0 c0fc in euc-kr
 _korean_pm = "\uc624\ud6c4"  # bfc0 c8c4 in euc-kr
 
 _korean_onblog_date_re = re.compile(
-    r"(\d{4})%s\s+(\d{2})%s\s+(\d{2})%s\s+(\d{2}):(\d{2}):(\d{2})" % (_korean_year, _korean_month, _korean_day),
+    fr"(\d{{4}}){_korean_year}\s+(\d{{2}}){_korean_month}\s+(\d{{2}}){_korean_day}\s+(\d{{2}}):(\d{{2}}):(\d{{2}})",
 )
 _korean_nate_date_re = re.compile(
-    r"(\d{4})-(\d{2})-(\d{2})\s+(%s|%s)\s+(\d{,2}):(\d{,2}):(\d{,2})" % (_korean_am, _korean_pm),
+    fr"(\d{{4}})-(\d{{2}})-(\d{{2}})\s+({_korean_am}|{_korean_pm})\s+(\d{{,2}}):(\d{{,2}}):(\d{{,2}})",
 )
 
 
@@ -2650,15 +2650,15 @@ def _parse_date_onblog(dateString):
     m = _korean_onblog_date_re.match(dateString)
     if not m:
         return None
-    w3dtfdate = "%(year)s-%(month)s-%(day)sT%(hour)s:%(minute)s:%(second)s%(zonediff)s" % {
-        "year": m.group(1),
-        "month": m.group(2),
-        "day": m.group(3),
-        "hour": m.group(4),
-        "minute": m.group(5),
-        "second": m.group(6),
-        "zonediff": "+09:00",
-    }
+    w3dtfdate = "{year}-{month}-{day}T{hour}:{minute}:{second}{zonediff}".format(
+        year=m.group(1),
+        month=m.group(2),
+        day=m.group(3),
+        hour=m.group(4),
+        minute=m.group(5),
+        second=m.group(6),
+        zonediff="+09:00",
+    )
     if _debug:
         sys.stderr.write("OnBlog date parsed as: %s\n" % w3dtfdate)
     return _parse_date_w3dtf(w3dtfdate)
@@ -2679,15 +2679,15 @@ def _parse_date_nate(dateString):
     hour = str(hour)
     if len(hour) == 1:
         hour = "0" + hour
-    w3dtfdate = "%(year)s-%(month)s-%(day)sT%(hour)s:%(minute)s:%(second)s%(zonediff)s" % {
-        "year": m.group(1),
-        "month": m.group(2),
-        "day": m.group(3),
-        "hour": hour,
-        "minute": m.group(6),
-        "second": m.group(7),
-        "zonediff": "+09:00",
-    }
+    w3dtfdate = "{year}-{month}-{day}T{hour}:{minute}:{second}{zonediff}".format(
+        year=m.group(1),
+        month=m.group(2),
+        day=m.group(3),
+        hour=hour,
+        minute=m.group(6),
+        second=m.group(7),
+        zonediff="+09:00",
+    )
     if _debug:
         sys.stderr.write("Nate date parsed as: %s\n" % w3dtfdate)
     return _parse_date_w3dtf(w3dtfdate)
@@ -2703,15 +2703,15 @@ def _parse_date_mssql(dateString):
     m = _mssql_date_re.match(dateString)
     if not m:
         return None
-    w3dtfdate = "%(year)s-%(month)s-%(day)sT%(hour)s:%(minute)s:%(second)s%(zonediff)s" % {
-        "year": m.group(1),
-        "month": m.group(2),
-        "day": m.group(3),
-        "hour": m.group(4),
-        "minute": m.group(5),
-        "second": m.group(6),
-        "zonediff": "+09:00",
-    }
+    w3dtfdate = "{year}-{month}-{day}T{hour}:{minute}:{second}{zonediff}".format(
+        year=m.group(1),
+        month=m.group(2),
+        day=m.group(3),
+        hour=m.group(4),
+        minute=m.group(5),
+        second=m.group(6),
+        zonediff="+09:00",
+    )
     if _debug:
         sys.stderr.write("MS SQL date parsed as: %s\n" % w3dtfdate)
     return _parse_date_w3dtf(w3dtfdate)
@@ -2765,16 +2765,16 @@ def _parse_date_greek(dateString):
         month = _greek_months[m.group(3)]
     except:
         return None
-    rfc822date = "%(wday)s, %(day)s %(month)s %(year)s %(hour)s:%(minute)s:%(second)s %(zonediff)s" % {
-        "wday": wday,
-        "day": m.group(2),
-        "month": month,
-        "year": m.group(4),
-        "hour": m.group(5),
-        "minute": m.group(6),
-        "second": m.group(7),
-        "zonediff": m.group(8),
-    }
+    rfc822date = "{wday}, {day} {month} {year} {hour}:{minute}:{second} {zonediff}".format(
+        wday=wday,
+        day=m.group(2),
+        month=month,
+        year=m.group(4),
+        hour=m.group(5),
+        minute=m.group(6),
+        second=m.group(7),
+        zonediff=m.group(8),
+    )
     if _debug:
         sys.stderr.write("Greek date parsed as: %s\n" % rfc822date)
     return _parse_date_rfc822(rfc822date)
@@ -2816,14 +2816,14 @@ def _parse_date_hungarian(dateString):
             hour = "0" + hour
     except:
         return None
-    w3dtfdate = "%(year)s-%(month)s-%(day)sT%(hour)s:%(minute)s%(zonediff)s" % {
-        "year": m.group(1),
-        "month": month,
-        "day": day,
-        "hour": hour,
-        "minute": m.group(5),
-        "zonediff": m.group(6),
-    }
+    w3dtfdate = "{year}-{month}-{day}T{hour}:{minute}{zonediff}".format(
+        year=m.group(1),
+        month=month,
+        day=day,
+        hour=hour,
+        minute=m.group(5),
+        zonediff=m.group(6),
+    )
     if _debug:
         sys.stderr.write("Hungarian date parsed as: %s\n" % w3dtfdate)
     return _parse_date_w3dtf(w3dtfdate)
@@ -2924,7 +2924,7 @@ def _parse_date_w3dtf(dateString):
     __time_re = (
         r"(?P<hours>\d\d)(?P<tsep>:|)(?P<minutes>\d\d)(?:(?P=tsep)(?P<seconds>\d\d(?:[.,]\d+)?))?" + __tzd_re
     )
-    __datetime_re = "%s(?:T%s)?" % (__date_re, __time_re)
+    __datetime_re = f"{__date_re}(?:T{__time_re})?"
     __datetime_rx = re.compile(__datetime_re)
     m = __datetime_rx.match(dateString)
     if (m is None) or (m.group() != dateString):
@@ -2980,7 +2980,7 @@ def _parse_date(dateString):
             return date9tuple
         except Exception as e:
             if _debug:
-                sys.stderr.write("%s raised %s\n" % (handler.__name__, repr(e)))
+                sys.stderr.write(f"{handler.__name__} raised {repr(e)}\n")
     return None
 
 
@@ -3357,13 +3357,13 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
         result["bozo"] = 1
         result["bozo_exception"] = CharacterEncodingUnknown(
             "document encoding unknown, I tried "
-            + "%s, %s, utf-8, and windows-1252 but nothing worked" % (result["encoding"], xml_encoding),
+            + "{}, {}, utf-8, and windows-1252 but nothing worked".format(result["encoding"], xml_encoding),
         )
         result["encoding"] = ""
     elif proposed_encoding != result["encoding"]:
         result["bozo"] = 1
         result["bozo_exception"] = CharacterEncodingOverride(
-            "documented declared as %s, but parsed as %s" % (result["encoding"], proposed_encoding),
+            "documented declared as {}, but parsed as {}".format(result["encoding"], proposed_encoding),
         )
         result["encoding"] = proposed_encoding
 

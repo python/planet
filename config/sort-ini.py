@@ -30,7 +30,7 @@ with open(filename, "wb") as fd:
         for key, value in oconfig._sections[section].items():
             if key != "__name__":
                 if section == "Planet":
-                    fd.write("%s = %s\n" % (key, str(value).replace("\n", "\n\t")))
+                    fd.write("{} = {}\n".format(key, str(value).replace("\n", "\n\t")))
                 else:
                     result[value.replace('"', "")] = section
         if section == "Planet":

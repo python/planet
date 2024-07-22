@@ -451,7 +451,7 @@ class SMTPHandler(logging.Handler):
                 port = smtplib.SMTP_PORT
             smtp = smtplib.SMTP(self.mailhost, port)
             msg = self.format(record)
-            msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
+            msg = "From: {}\r\nTo: {}\r\nSubject: {}\r\nDate: {}\r\n\r\n{}".format(
                 self.fromaddr,
                 string.join(self.toaddrs, ","),
                 self.getSubject(record),

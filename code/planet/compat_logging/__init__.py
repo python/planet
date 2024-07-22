@@ -219,7 +219,7 @@ class LogRecord:
             self.process = None
 
     def __str__(self):
-        return '<LogRecord: %s, %s, %s, %s, "%s">' % (self.name, self.levelno, self.pathname, self.lineno, self.msg)
+        return f'<LogRecord: {self.name}, {self.levelno}, {self.pathname}, {self.lineno}, "{self.msg}">'
 
     def getMessage(self):
         """Return the message for this LogRecord.

@@ -220,7 +220,7 @@ class Planet:
             self.cache_directory = self.config.get("Planet", "cache_directory")
         if self.config.has_option("Planet", "new_feed_items"):
             self.new_feed_items = int(self.config.get("Planet", "new_feed_items"))
-        self.user_agent = "%s +%s %s" % (planet_name, planet_link, self.user_agent)
+        self.user_agent = f"{planet_name} +{planet_link} {self.user_agent}"
         if self.config.has_option("Planet", "filter"):
             self.filter = self.config.get("Planet", "filter")
 
@@ -593,7 +593,7 @@ class Channel(cache.CachedInfo):
         if self.url == self.configured_url:
             return "<%s>" % self.url
         else:
-            return "<%s> (formerly <%s>)" % (self.url, self.configured_url)
+            return f"<{self.url}> (formerly <{self.configured_url}>)"
 
     def update(self):
         """Download the feed to refresh the information.
