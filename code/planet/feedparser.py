@@ -2765,16 +2765,7 @@ def _parse_date_greek(dateString):
         month = _greek_months[m.group(3)]
     except:
         return None
-    rfc822date = "{wday}, {day} {month} {year} {hour}:{minute}:{second} {zonediff}".format(
-        wday=wday,
-        day=m.group(2),
-        month=month,
-        year=m.group(4),
-        hour=m.group(5),
-        minute=m.group(6),
-        second=m.group(7),
-        zonediff=m.group(8),
-    )
+    rfc822date = f"{wday}, {m.group(2)} {month} {m.group(4)} {m.group(5)}:{m.group(6)}:{m.group(7)} {m.group(8)}"
     if _debug:
         sys.stderr.write("Greek date parsed as: %s\n" % rfc822date)
     return _parse_date_rfc822(rfc822date)
@@ -2816,14 +2807,7 @@ def _parse_date_hungarian(dateString):
             hour = "0" + hour
     except:
         return None
-    w3dtfdate = "{year}-{month}-{day}T{hour}:{minute}{zonediff}".format(
-        year=m.group(1),
-        month=month,
-        day=day,
-        hour=hour,
-        minute=m.group(5),
-        zonediff=m.group(6),
-    )
+    w3dtfdate = f"{m.group(1)}-{month}-{day}T{hour}:{m.group(5)}{m.group(6)}"
     if _debug:
         sys.stderr.write("Hungarian date parsed as: %s\n" % w3dtfdate)
     return _parse_date_w3dtf(w3dtfdate)
