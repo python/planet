@@ -46,6 +46,7 @@ __contributors__ = [
 ]
 
 import calendar
+import datetime
 import email.utils
 import html.entities
 from html.parser import HTMLParser
@@ -117,6 +118,7 @@ try:
 except:
     _XML_AVAILABLE = 0
 
+
     def _xmlescape(data, entities={}):
         data = data.replace("&", "&amp;")
         data = data.replace(">", "&gt;")
@@ -124,7 +126,6 @@ except:
         for char, entity in entities:
             data = data.replace(char, entity)
         return data
-
 
 # base64 support for Atom feeds that contain embedded binary data
 try:
@@ -204,6 +205,7 @@ except NameError:
     # Python 2.1 does not have dict
     from collections import UserDict
 
+
     def dict(aList):
         return dict(aList)
 
@@ -233,7 +235,7 @@ class FeedParserDict(UserDict):
         if key == "categories":
             return [(tag["scheme"], tag["term"]) for tag in UserDict.__getitem__(self, "tags")]
         realkey = self.keymap.get(key, key)
-        if type(realkey) == types.ListType:
+        if isinstance(realkey, list):
             for k in realkey:
                 if UserDict.has_key(self, k):
                     return UserDict.__getitem__(self, k)
@@ -245,7 +247,7 @@ class FeedParserDict(UserDict):
         for k in self.keymap.keys():
             if key == k:
                 key = self.keymap[k]
-                if type(key) == types.ListType:
+                if isinstance(key, list):
                     key = key[0]
         return UserDict.__setitem__(self, key, value)
 
@@ -776,9 +778,9 @@ class _FeedParserMixin:
 
         # track inline content
         if (
-            self.incontent
-            and self.contentparams.has_key("type")
-            and not self.contentparams.get("type", "xml").endswith("xml")
+                self.incontent
+                and self.contentparams.has_key("type")
+                and not self.contentparams.get("type", "xml").endswith("xml")
         ):
             # element declared itself as escaped markup, but it isn't really
             self.contentparams["type"] = "application/xhtml+xml"
@@ -839,9 +841,9 @@ class _FeedParserMixin:
 
         # track inline content
         if (
-            self.incontent
-            and self.contentparams.has_key("type")
-            and not self.contentparams.get("type", "xml").endswith("xml")
+                self.incontent
+                and self.contentparams.has_key("type")
+                and not self.contentparams.get("type", "xml").endswith("xml")
         ):
             # element declared itself as escaped markup, but it isn't really
             self.contentparams["type"] = "application/xhtml+xml"
@@ -926,11 +928,11 @@ class _FeedParserMixin:
         # override internal declaration handler to handle CDATA blocks
         if _debug:
             sys.stderr.write("entering parse_declaration\n")
-        if self.rawdata[i : i + 9] == "<![CDATA[":
+        if self.rawdata[i: i + 9] == "<![CDATA[":
             k = self.rawdata.find("]]>", i)
             if k == -1:
                 k = len(self.rawdata)
-            self.handle_data(_xmlescape(self.rawdata[i + 9 : k]), 0)
+            self.handle_data(_xmlescape(self.rawdata[i + 9: k]), 0)
             return k + 3
         else:
             k = self.rawdata.find(">", i)
@@ -1120,7 +1122,7 @@ class _FeedParserMixin:
         colonpos = name.find(":")
         if colonpos != -1:
             prefix = name[:colonpos]
-            suffix = name[colonpos + 1 :]
+            suffix = name[colonpos + 1:]
             prefix = self.namespacemap.get(prefix, prefix)
             name = prefix + ":" + suffix
         return name
@@ -1833,9 +1835,9 @@ if _XML_AVAILABLE:
                 givenprefix = None
             prefix = self._matchnamespaces.get(lowernamespace, givenprefix)
             if (
-                givenprefix
-                and (prefix == None or (prefix == "" and lowernamespace == ""))
-                and not self.namespacesInUse.has_key(givenprefix)
+                    givenprefix
+                    and (prefix == None or (prefix == "" and lowernamespace == ""))
+                    and not self.namespacesInUse.has_key(givenprefix)
             ):
                 raise UndeclaredNamespace("'%s' is not associated with a namespace" % givenprefix)
             if prefix:
@@ -2931,7 +2933,7 @@ def _parse_date_rfc822(dateString):
         s = data[3]
         i = s.find("+")
         if i > 0:
-            data[3:] = [s[:i], s[i + 1 :]]
+            data[3:] = [s[:i], s[i + 1:]]
         else:
             data.append("")
         dateString = " ".join(data)
@@ -2940,13 +2942,6 @@ def _parse_date_rfc822(dateString):
     tm = email.utils.parsedate_tz(dateString)
     if tm:
         return time.gmtime(calendar.timegm(tm[:9]))
-
-
-# Define additional time zones
-_additional_timezones = {"AT": -400, "ET": -500, "CT": -600, "MT": -700, "PT": -800}
-email.utils._LOCALTZONES.update(_additional_timezones)
-
-registerDateHandler(_parse_date_rfc822)
 
 
 def _parse_date(dateString):
@@ -3084,35 +3079,35 @@ def _getCharacterEncoding(http_headers, xml_data):
     if xml_encoding_match:
         xml_encoding = xml_encoding_match.groups()[0].lower()
         if sniffed_xml_encoding and (
-            xml_encoding
-            in (
-                "iso-10646-ucs-2",
-                "ucs-2",
-                "csunicode",
-                "iso-10646-ucs-4",
-                "ucs-4",
-                "csucs4",
-                "utf-16",
-                "utf-32",
-                "utf_16",
-                "utf_32",
-                "utf16",
-                "u16",
-            )
+                xml_encoding
+                in (
+                        "iso-10646-ucs-2",
+                        "ucs-2",
+                        "csunicode",
+                        "iso-10646-ucs-4",
+                        "ucs-4",
+                        "csucs4",
+                        "utf-16",
+                        "utf-32",
+                        "utf_16",
+                        "utf_32",
+                        "utf16",
+                        "u16",
+                )
         ):
             xml_encoding = sniffed_xml_encoding
     acceptable_content_type = 0
     application_content_types = ("application/xml", "application/xml-dtd", "application/xml-external-parsed-entity")
     text_content_types = ("text/xml", "text/xml-external-parsed-entity")
     if (http_content_type in application_content_types) or (
-        http_content_type.startswith("application/") and http_content_type.endswith("+xml")
+            http_content_type.startswith("application/") and http_content_type.endswith("+xml")
     ):
         acceptable_content_type = 1
         true_encoding = http_encoding or xml_encoding or "utf-8"
     elif (
-        (http_content_type in text_content_types)
-        or (http_content_type.startswith("text/"))
-        and http_content_type.endswith("+xml")
+            (http_content_type in text_content_types)
+            or (http_content_type.startswith("text/"))
+            and http_content_type.endswith("+xml")
     ):
         acceptable_content_type = 1
         true_encoding = http_encoding or "us-ascii"
@@ -3207,7 +3202,7 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
     result["entries"] = []
     if _XML_AVAILABLE:
         result["bozo"] = 0
-    if type(handlers) == types.InstanceType:
+    if isinstance(handlers, object):
         handlers = [handlers]
     try:
         f = _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, handlers)
@@ -3282,8 +3277,8 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
     if result.get("status", 0) == 304:
         result["version"] = ""
         result["debug_message"] = (
-            "The feed has not changed since you last checked, "
-            + "so the server sent no data.  This is a feature, not a bug!"
+                "The feed has not changed since you last checked, "
+                + "so the server sent no data.  This is a feature, not a bug!"
         )
         return result
 

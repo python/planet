@@ -10,28 +10,19 @@ __version__ = "2.0"
 __authors__ = ["Scott James Remnant <scott@netsplit.com>", "Jeff Waugh <jdub@perkypants.org>"]
 __license__ = "Python"
 
-
 # Modules available without separate import
-import cache
-import feedparser
-import htmltmpl
-import sanitize
+import dbm
+import os
+import re
+import sys
+import time
+from hashlib import md5
+from html.parser import HTMLParser
 
 try:
     import logging
 except:
     import compat_logging as logging
-
-# Limit the effect of "from planet import *"
-__all__ = ("cache", "feedparser", "htmltmpl", "logging", "Planet", "Channel", "NewsItem")
-
-
-import dbm
-import os
-import re
-import time
-from hashlib import md5
-from html.parser import HTMLParser
 
 try:
     from xml.sax.saxutils import escape
@@ -40,6 +31,11 @@ except:
     def escape(data):
         return data.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from . import cache, feedparser, htmltmpl, sanitize
+
+# Limit the effect of "from planet import *"
+__all__ = ("cache", "feedparser", "htmltmpl", "logging", "Planet", "Channel", "NewsItem")
 
 # Version information (for generator headers)
 VERSION = "Planet/%s +http://www.planetplanet.org" % __version__
@@ -56,7 +52,6 @@ NEW_FEED_ITEMS = 10
 # Useful common date/time formats
 TIMEFMT_ISO = "%Y-%m-%dT%H:%M:%S+00:00"
 TIMEFMT_822 = "%a, %d %b %Y %H:%M:%S +0000"
-
 
 # Log instance to use here
 log = logging.getLogger("planet")
@@ -602,14 +597,18 @@ class Channel(cache.CachedInfo):
         updates the cached information about the feed and entries within it.
         """
         info = feedparser.parse(self.url, etag=self.url_etag, modified=self.url_modified, agent=self._planet.user_agent)
-        if info.has_key("status"):
+
+        if hasattr(info, "status"):
             self.url_status = str(info.status)
-        elif info.has_key("entries") and len(info.entries) > 0:
-            self.url_status = str(200)
-        elif info.bozo and info.bozo_exception.__class__.__name__ == "Timeout":
-            self.url_status = str(408)
+        elif hasattr(info, "entries") and info.entries:
+            self.url_status = "200"
+        elif hasattr(info, "bozo") and info.bozo and hasattr(info, "bozo_exception"):
+            if info.bozo_exception.__class__.__name__ == "Timeout":
+                self.url_status = "408"
+            else:
+                self.url_status = "500"
         else:
-            self.url_status = str(500)
+            self.url_status = "500"
 
         if self.url_status == "301" and (info.has_key("entries") and len(info.entries) > 0):
             log.warning("Feed has moved from <%s> to <%s>", self.url, info.url)
@@ -751,9 +750,9 @@ class Channel(cache.CachedInfo):
 
             # Hide excess items the first time through
             if (
-                self.last_updated is None
-                and self._planet.new_feed_items
-                and len(feed_items) > self._planet.new_feed_items
+                    self.last_updated is None
+                    and self._planet.new_feed_items
+                    and len(feed_items) > self._planet.new_feed_items
             ):
                 item.hidden = "yes"
                 log.debug("Marked <%s> as hidden (new feed)", entry_id)
@@ -853,9 +852,9 @@ class NewsItem(cache.CachedInfo):
                 if entry[key].has_key("email") and entry[key].email:
                     self.set_as_string(key.replace("_detail", "_email"), entry[key].email)
                 if (
-                    entry[key].has_key("language")
-                    and entry[key].language
-                    and (not self._channel.has_key("language") or entry[key].language != self._channel.language)
+                        entry[key].has_key("language")
+                        and entry[key].language
+                        and (not self._channel.has_key("language") or entry[key].language != self._channel.language)
                 ):
                     self.set_as_string(key.replace("_detail", "_language"), entry[key].language)
             elif key.endswith("_parsed"):
@@ -877,9 +876,9 @@ class NewsItem(cache.CachedInfo):
                     elif item.type == "text/plain":
                         item.value = escape(item.value)
                     if (
-                        item.has_key("language")
-                        and item.language
-                        and (not self._channel.has_key("language") or item.language != self._channel.language)
+                            item.has_key("language")
+                            and item.language
+                            and (not self._channel.has_key("language") or item.language != self._channel.language)
                     ):
                         self.set_as_string(key + "_language", item.language)
                     value += cache.utf8(item.value)

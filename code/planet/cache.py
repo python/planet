@@ -55,22 +55,19 @@ class CachedInfo:
 
     def cache_read(self):
         """Read information from the cache."""
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
+        keys_key = " keys" if self._root else self._id
 
-        if self._cache.has_key(keys_key):
+        if keys_key in self._cache:
             keys = self._cache[keys_key].split(" ")
         else:
             return
 
         for key in keys:
             cache_key = self.cache_key(key)
-            if not self._cached.has_key(key) or self._cached[key]:
+            if key not in self._cached or self._cached[key]:
                 # Key either hasn't been loaded, or is one for the cache
                 self._value[key] = self._cache[cache_key]
-                self._type[key] = self._cache[cache_key + " type"]
+                self._type[key] = self._cache[f"{cache_key} type"]
                 self._cached[key] = 1
 
     def cache_write(self, sync=1):
@@ -81,42 +78,34 @@ class CachedInfo:
         for key in self.keys():
             cache_key = self.cache_key(key)
             if not self._cached[key]:
-                if self._cache.has_key(cache_key):
+                if cache_key in self._cache:
                     # Non-cached keys need to be cleared
                     del self._cache[cache_key]
-                    del self._cache[cache_key + " type"]
+                    del self._cache[f"{cache_key} type"]
                 continue
 
             keys.append(key)
             self._cache[cache_key] = self._value[key]
-            self._cache[cache_key + " type"] = self._type[key]
+            self._cache[f"{cache_key} type"] = self._type[key]
 
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
-
+        keys_key = " keys" if self._root else self._id
         self._cache[keys_key] = " ".join(keys)
         if sync:
             self._cache.sync()
 
     def cache_clear(self, sync=1):
         """Remove information from the cache."""
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
+        keys_key = " keys" if self._root else self._id
 
-        if self._cache.has_key(keys_key):
-            keys = self._cache[keys_key].split(" ")
-            del self._cache[keys_key]
-        else:
+        if keys_key not in self._cache:
             return
 
+        keys = self._cache[keys_key].split(" ")
+        del self._cache[keys_key]
         for key in keys:
             cache_key = self.cache_key(key)
             del self._cache[cache_key]
-            del self._cache[cache_key + " type"]
+            del self._cache[f"{cache_key} type"]
 
         if sync:
             self._cache.sync()
@@ -124,7 +113,7 @@ class CachedInfo:
     def has_key(self, key):
         """Check whether the key exists."""
         key = key.replace(" ", "_")
-        return self._value.has_key(key)
+        return key in self._value
 
     def key_type(self, key):
         """Return the key type."""
@@ -196,9 +185,8 @@ class CachedInfo:
     def get_as_string(self, key):
         """Return the key as a string value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
+        if key not in self._value:
             raise KeyError(key)
-
         return self._value[key]
 
     def set_as_date(self, key, value, cached=1):
@@ -216,11 +204,10 @@ class CachedInfo:
     def get_as_date(self, key):
         """Return the key as a date value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
+        if key not in self._value:
             raise KeyError(key)
-
         value = self._value[key]
-        return tuple([int(i) for i in value.split(" ")])
+        return tuple(int(i) for i in value.split(" "))
 
     def set_as_null(self, key, value, cached=1):
         """Set the key to the null value.
@@ -235,13 +222,13 @@ class CachedInfo:
     def get_as_null(self, key):
         """Return the key as the null value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
+        if key not in self._value:
             raise KeyError(key)
 
     def del_key(self, key):
         """Delete the given key."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
+        if key not in self._value:
             raise KeyError(key)
 
         del self._value[key]
@@ -270,10 +257,9 @@ class CachedInfo:
             self.set(key, value)
 
     def __getattr__(self, key):
-        if self.has_key(key):
+        if key in self._value:
             return self.get(key)
-        else:
-            raise AttributeError(key)
+        raise AttributeError(key)
 
 
 def filename(directory, filename):
@@ -292,13 +278,6 @@ def filename(directory, filename):
 
 def utf8(value):
     """Return the value as a UTF-8 string."""
-    if type(value) == str:
-        return value.encode("utf-8")
-    else:
-        try:
-            return str(value, "utf-8").encode("utf-8")
-        except UnicodeError:
-            try:
-                return str(value, "iso-8859-1").encode("utf-8")
-            except UnicodeError:
-                return str(value, "ascii", "replace").encode("utf-8")
+    if isinstance(value, str):
+        return value
+    return value.decode("utf-8") if isinstance(value, bytes) else str(value)

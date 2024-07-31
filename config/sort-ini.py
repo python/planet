@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 import sys
-
-import ConfigParser
+from configparser import DEFAULTSECT, RawConfigParser
 
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 else:
     filename = "config.ini"
 
-oconfig = ConfigParser.RawConfigParser()
+oconfig = RawConfigParser()
 oconfig.read(filename)
 
 # This part will destroy the configuration if there's a crash while

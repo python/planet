@@ -72,7 +72,7 @@ def main():
             config_file = arg
 
     # Read the configuration file
-    config = configparser()
+    config = configparser.ConfigParser()
     config.read(config_file)
     if not config.has_section("Planet"):
         print("Configuration missing [Planet] section.", file=sys.stderr)
