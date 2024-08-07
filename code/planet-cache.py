@@ -6,7 +6,7 @@ __license__ = "Python"
 
 
 import configparser
-import dbm
+import shelve
 import os
 import sys
 import time
@@ -114,9 +114,9 @@ if __name__ == "__main__":
 
     # Open the cache file directly to get the URL it represents
     try:
-        with dbm.open(cache_file, "r") as db:
+        with shelve.open(cache_file, "r") as db:
             url = db[b"url"].decode("utf-8")
-    except dbm.error as e:
+    except shelve.error as e:
         print(f"{cache_file}: {e!s}", file=sys.stderr)
         sys.exit(1)
     except KeyError:

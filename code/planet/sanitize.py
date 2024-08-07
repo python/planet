@@ -84,7 +84,7 @@ class _BaseHTMLProcessor(HTMLParser):
         data = self._r_shorttag.sub(self._shorttag_replace, data)
         if self.encoding and isinstance(data, str):
             data = data.encode(self.encoding)
-        super().feed(data)
+        super().feed(data.decode())
 
     def normalize_attrs(self, attrs):
         # utility method to be called by descendants
