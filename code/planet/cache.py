@@ -11,6 +11,7 @@ that the rest of the code can take the persistance for granted.
 
 import os
 import re
+import time
 
 # Regular expressions to sanitise cache filenames
 re_url_scheme = re.compile(r"^[^:]*://")
@@ -138,6 +139,8 @@ class CachedInfo:
 
         if value == None:
             return self.set_as_null(key, value)
+        elif isinstance(value, time.struct_time):
+            return self.set_as_date(key, value)
         else:
             try:
                 return self.set_as_string(key, value)
