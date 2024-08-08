@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python3
 """Item cache.
 
 Between runs of Planet we need somewhere to store the feed information
@@ -12,13 +11,13 @@ that the rest of the code can take the persistance for granted.
 
 import os
 import re
-
+import time
 
 # Regular expressions to sanitise cache filenames
-re_url_scheme    = re.compile(r'^[^:]*://')
-re_slash         = re.compile(r'[?/]+')
-re_initial_cruft = re.compile(r'^[,.]*')
-re_final_cruft   = re.compile(r'[,.]*$')
+re_url_scheme = re.compile(r"^[^:]*://")
+re_slash = re.compile(r"[?/]+")
+re_initial_cruft = re.compile(r"^[,.]*")
+re_final_cruft = re.compile(r"[,.]*$")
 
 
 class CachedInfo:
@@ -33,9 +32,10 @@ class CachedInfo:
     and implement get_FIELD and set_FIELD functions which will be
     automatically called.
     """
+
     STRING = "string"
-    DATE   = "date"
-    NULL   = "null"
+    DATE = "date"
+    NULL = "null"
 
     def __init__(self, cache, id_, root=0):
         self._type = {}
@@ -56,22 +56,19 @@ class CachedInfo:
 
     def cache_read(self):
         """Read information from the cache."""
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
+        keys_key = " keys" if self._root else self._id
 
-        if self._cache.has_key(keys_key):
+        if keys_key in self._cache:
             keys = self._cache[keys_key].split(" ")
         else:
             return
 
         for key in keys:
             cache_key = self.cache_key(key)
-            if not self._cached.has_key(key) or self._cached[key]:
+            if key not in self._cached or self._cached[key]:
                 # Key either hasn't been loaded, or is one for the cache
                 self._value[key] = self._cache[cache_key]
-                self._type[key] = self._cache[cache_key + " type"]
+                self._type[key] = self._cache[f"{cache_key} type"]
                 self._cached[key] = 1
 
     def cache_write(self, sync=1):
@@ -82,42 +79,34 @@ class CachedInfo:
         for key in self.keys():
             cache_key = self.cache_key(key)
             if not self._cached[key]:
-                if self._cache.has_key(cache_key):
+                if cache_key in self._cache:
                     # Non-cached keys need to be cleared
-                    del(self._cache[cache_key])
-                    del(self._cache[cache_key + " type"])
+                    del self._cache[cache_key]
+                    del self._cache[f"{cache_key} type"]
                 continue
 
             keys.append(key)
             self._cache[cache_key] = self._value[key]
-            self._cache[cache_key + " type"] = self._type[key]
+            self._cache[f"{cache_key} type"] = self._type[key]
 
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
-
+        keys_key = " keys" if self._root else self._id
         self._cache[keys_key] = " ".join(keys)
         if sync:
             self._cache.sync()
 
     def cache_clear(self, sync=1):
         """Remove information from the cache."""
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
+        keys_key = " keys" if self._root else self._id
 
-        if self._cache.has_key(keys_key):
-            keys = self._cache[keys_key].split(" ")
-            del(self._cache[keys_key])
-        else:
+        if keys_key not in self._cache:
             return
 
+        keys = self._cache[keys_key].split(" ")
+        del self._cache[keys_key]
         for key in keys:
             cache_key = self.cache_key(key)
-            del(self._cache[cache_key])
-            del(self._cache[cache_key + " type"])
+            del self._cache[cache_key]
+            del self._cache[f"{cache_key} type"]
 
         if sync:
             self._cache.sync()
@@ -125,7 +114,7 @@ class CachedInfo:
     def has_key(self, key):
         """Check whether the key exists."""
         key = key.replace(" ", "_")
-        return self._value.has_key(key)
+        return key in self._value
 
     def key_type(self, key):
         """Return the key type."""
@@ -150,6 +139,8 @@ class CachedInfo:
 
         if value == None:
             return self.set_as_null(key, value)
+        elif isinstance(value, time.struct_time):
+            return self.set_as_date(key, value)
         else:
             try:
                 return self.set_as_string(key, value)
@@ -197,9 +188,8 @@ class CachedInfo:
     def get_as_string(self, key):
         """Return the key as a string value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
-
+        if key not in self._value:
+            raise KeyError(key)
         return self._value[key]
 
     def set_as_date(self, key, value, cached=1):
@@ -207,7 +197,7 @@ class CachedInfo:
 
         The date should be a 9-item tuple as returned by time.gmtime().
         """
-        value = " ".join([ str(s) for s in value ])
+        value = " ".join([str(s) for s in value])
 
         key = key.replace(" ", "_")
         self._value[key] = value
@@ -217,11 +207,10 @@ class CachedInfo:
     def get_as_date(self, key):
         """Return the key as a date value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
-
+        if key not in self._value:
+            raise KeyError(key)
         value = self._value[key]
-        return tuple([ int(i) for i in value.split(" ") ])
+        return tuple(int(i) for i in value.split(" "))
 
     def set_as_null(self, key, value, cached=1):
         """Set the key to the null value.
@@ -236,20 +225,18 @@ class CachedInfo:
     def get_as_null(self, key):
         """Return the key as the null value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
-
-        return None
+        if key not in self._value:
+            raise KeyError(key)
 
     def del_key(self, key):
         """Delete the given key."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
+        if key not in self._value:
+            raise KeyError(key)
 
-        del(self._value[key])
-        del(self._type[key])
-        del(self._cached[key])
+        del self._value[key]
+        del self._type[key]
+        del self._cached[key]
 
     def keys(self):
         """Return the list of cached keys."""
@@ -261,10 +248,10 @@ class CachedInfo:
 
     # Special methods
     __contains__ = has_key
-    __setitem__  = set_as_string
-    __getitem__  = get
-    __delitem__  = del_key
-    __delattr__  = del_key
+    __setitem__ = set_as_string
+    __getitem__ = get
+    __delitem__ = del_key
+    __delattr__ = del_key
 
     def __setattr__(self, key, value):
         if key.startswith("_"):
@@ -273,10 +260,9 @@ class CachedInfo:
             self.set(key, value)
 
     def __getattr__(self, key):
-        if self.has_key(key):
+        if key in self._value:
             return self.get(key)
-        else:
-            raise AttributeError, key
+        raise AttributeError(key)
 
 
 def filename(directory, filename):
@@ -292,15 +278,9 @@ def filename(directory, filename):
 
     return os.path.join(directory, filename)
 
+
 def utf8(value):
     """Return the value as a UTF-8 string."""
-    if type(value) == type(u''):
-        return value.encode("utf-8")
-    else:
-        try:
-            return unicode(value, "utf-8").encode("utf-8")
-        except UnicodeError:
-            try:
-                return unicode(value, "iso-8859-1").encode("utf-8")
-            except UnicodeError:
-                return unicode(value, "ascii", "replace").encode("utf-8")
+    if isinstance(value, str):
+        return value
+    return value.decode("utf-8") if isinstance(value, bytes) else str(value)
