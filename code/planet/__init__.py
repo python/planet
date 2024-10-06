@@ -617,7 +617,10 @@ class Channel(cache.CachedInfo):
         for key in keys:
             if key.find(" ") != -1:
                 continue
-            if key in self:
+
+            # We can't use __contains__ / `in` syntax with the Cache type; it does something
+            # different (using `has_item` above)
+            if self.has_key(key):
                 continue
 
             item = NewsItem(self, key)
