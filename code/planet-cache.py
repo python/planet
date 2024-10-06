@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Planet cache tool."""
 
-__authors__ = ["Scott James Remnant <scott@netsplit.com>", "Jeff Waugh <jdub@perkypants.org>"]
+__authors__ = [
+    "Scott James Remnant <scott@netsplit.com>",
+    "Jeff Waugh <jdub@perkypants.org>",
+]
 __license__ = "Python"
 
 
 import configparser
-import shelve
 import os
+import shelve
 import sys
 import time
 
@@ -144,7 +147,7 @@ if __name__ == "__main__":
 
     elif command == "list":
         print("Items in Channel:")
-        for item in channel.items(hidden=1, sorted=1):
+        for item in channel.items(hidden=True, sorted=True):
             print("    " + item.id)
             print("         " + time.strftime(planet.TIMEFMT_ISO, item.date))
             if hasattr(item, "title"):

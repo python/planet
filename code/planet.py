@@ -2,17 +2,9 @@
 """The Planet aggregator.
 
 A flexible and easy-to-use aggregator for generating websites.
-
-Visit http://www.planetplanet.org/ for more information and to download
-the latest version.
-
-Requires Python 2.1, recommends 2.3.
 """
 
-__authors__ = ["Scott James Remnant <scott@netsplit.com>", "Jeff Waugh <jdub@perkypants.org>"]
-__license__ = "Python"
-
-
+import argparse
 import configparser
 import locale
 import os
@@ -38,7 +30,7 @@ FEED_TIMEOUT = 20  # seconds
 TEMPLATE_FILES = "examples/basic/planet.html.tmpl"
 
 
-def config_get(config, section, option, default=None, raw=0, vars=None):
+def config_get(config, section, option, default=None, raw=False, vars=None):
     """Get a value from the configuration, with a default."""
     if config.has_option(section, option):
         return config.get(section, option, raw=raw, vars=None)
@@ -51,25 +43,26 @@ def main():
     offline = 0
     verbose = 0
 
-    for arg in sys.argv[1:]:
-        if arg == "-h" or arg == "--help":
-            print("Usage: planet [options] [CONFIGFILE]")
-            print()
-            print("Options:")
-            print(" -v, --verbose       DEBUG level logging during update")
-            print(" -o, --offline       Update the Planet from the cache only")
-            print(" -h, --help          Display this help message and exit")
-            print()
-            sys.exit(0)
-        elif arg == "-v" or arg == "--verbose":
-            verbose = 1
-        elif arg == "-o" or arg == "--offline":
-            offline = 1
-        elif arg.startswith("-"):
-            print("Unknown option:", arg, file=sys.stderr)
-            sys.exit(1)
-        else:
-            config_file = arg
+    parser = argparse.ArgumentParser(description="The Planet aggregator")
+
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="DEBUG level logging during update"
+    )
+    parser.add_argument(
+        "-o",
+        "--offline",
+        action="store_true",
+        help="Update the Planet from the cache only",
+    )
+    parser.add_argument(
+        "config_file", nargs="?", help="Configuration file", default=CONFIG_FILE
+    )
+
+    args = parser.parse_args()
+
+    verbose = args.verbose
+    offline = args.offline
+    config_file = args.config_file
 
     # Read the configuration file
     config = configparser.ConfigParser()
@@ -89,7 +82,9 @@ def main():
     else:
         log_level = config_get(config, "Planet", "log_level", LOG_LEVEL)
     feed_timeout = config_get(config, "Planet", "feed_timeout", FEED_TIMEOUT)
-    template_files = config_get(config, "Planet", "template_files", TEMPLATE_FILES).split(" ")
+    template_files = config_get(
+        config, "Planet", "template_files", TEMPLATE_FILES
+    ).split(" ")
 
     # Default feed to the first feed for which there is a template
     if not planet_feed:
@@ -130,7 +125,9 @@ def main():
         try:
             feed_timeout = float(feed_timeout)
         except:
-            log.warning("Feed timeout set to invalid value '%s', skipping", feed_timeout)
+            log.warning(
+                "Feed timeout set to invalid value '%s', skipping", feed_timeout
+            )
             feed_timeout = None
 
     if feed_timeout and not offline:
@@ -141,7 +138,9 @@ def main():
     my_planet = planet.Planet(config)
     my_planet.run(planet_name, planet_link, template_files, offline)
 
-    my_planet.generate_all_files(template_files, planet_name, planet_link, planet_feed, owner_name, owner_email)
+    my_planet.generate_all_files(
+        template_files, planet_name, planet_link, planet_feed, owner_name, owner_email
+    )
 
 
 if __name__ == "__main__":

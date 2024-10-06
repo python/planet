@@ -11,7 +11,9 @@ that the rest of the code can take the persistance for granted.
 
 import os
 import re
+import shelve
 import time
+from typing import Any
 
 # Regular expressions to sanitise cache filenames
 re_url_scheme = re.compile(r"^[^:]*://")
@@ -37,16 +39,16 @@ class CachedInfo:
     DATE = "date"
     NULL = "null"
 
-    def __init__(self, cache, id_, root=0):
-        self._type = {}
-        self._value = {}
-        self._cached = {}
+    def __init__(self, cache: shelve.Shelf[Any], id_, root=False):
+        self._type: dict[str, str] = {}
+        self._value: dict[str, Any] = {}
+        self._cached: dict[str, Any] = {}
 
         self._cache = cache
         self._id = id_.replace(" ", "%20")
         self._root = root
 
-    def cache_key(self, key):
+    def cache_key(self, key: str) -> str:
         """Return the cache key name for the given key."""
         key = key.replace(" ", "_")
         if self._root:
@@ -54,7 +56,7 @@ class CachedInfo:
         else:
             return self._id + " " + key
 
-    def cache_read(self):
+    def cache_read(self) -> None:
         """Read information from the cache."""
         keys_key = " keys" if self._root else self._id
 
@@ -71,9 +73,9 @@ class CachedInfo:
                 self._type[key] = self._cache[f"{cache_key} type"]
                 self._cached[key] = 1
 
-    def cache_write(self, sync=1):
+    def cache_write(self, sync: bool = True):
         """Write information to the cache."""
-        self.cache_clear(sync=0)
+        self.cache_clear(sync=False)
 
         keys = []
         for key in self.keys():
@@ -94,7 +96,7 @@ class CachedInfo:
         if sync:
             self._cache.sync()
 
-    def cache_clear(self, sync=1):
+    def cache_clear(self, sync: bool = True):
         """Remove information from the cache."""
         keys_key = " keys" if self._root else self._id
 
@@ -111,7 +113,7 @@ class CachedInfo:
         if sync:
             self._cache.sync()
 
-    def has_key(self, key):
+    def has_key(self, key: str) -> bool:
         """Check whether the key exists."""
         key = key.replace(" ", "_")
         return key in self._value
@@ -121,7 +123,7 @@ class CachedInfo:
         key = key.replace(" ", "_")
         return self._type[key]
 
-    def set(self, key, value, cached=1):
+    def set(self, key: str, value: Any, cached: bool = True) -> Any:
         """Set the value of the given key.
 
         If a set_KEY function exists that is called otherwise the
@@ -137,17 +139,17 @@ class CachedInfo:
         else:
             return func(key, value)
 
-        if value == None:
+        if value is None:
             return self.set_as_null(key, value)
         elif isinstance(value, time.struct_time):
             return self.set_as_date(key, value)
         else:
             try:
-                return self.set_as_string(key, value)
+                return self.set_as_string(key, value, cached)
             except TypeError:
-                return self.set_as_date(key, value)
+                return self.set_as_date(key, value, cached)
 
-    def get(self, key):
+    def get(self, key: str) -> Any | None:
         """Return the value of the given key.
 
         If a get_KEY function exists that is called otherwise the
@@ -171,7 +173,7 @@ class CachedInfo:
 
         return self._value[key]
 
-    def set_as_string(self, key, value, cached=1):
+    def set_as_string(self, key, value, cached: bool = True):
         """Set the key to the string value.
 
         The value is converted to UTF-8 if it is a Unicode string, otherwise
@@ -192,7 +194,7 @@ class CachedInfo:
             raise KeyError(key)
         return self._value[key]
 
-    def set_as_date(self, key, value, cached=1):
+    def set_as_date(self, key, value, cached: bool = True):
         """Set the key to the date value.
 
         The date should be a 9-item tuple as returned by time.gmtime().
@@ -212,7 +214,7 @@ class CachedInfo:
         value = self._value[key]
         return tuple(int(i) for i in value.split(" "))
 
-    def set_as_null(self, key, value, cached=1):
+    def set_as_null(self, key, value, cached: bool = True):
         """Set the key to the null value.
 
         This only exists to make things less magic.
