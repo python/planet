@@ -7,25 +7,25 @@
 	xmlns:dc="http://purl.org/dc/elements/1.1/"
 >
 <foaf:Group>
-	<foaf:name><TMPL_VAR name></foaf:name>
-	<foaf:homepage><TMPL_VAR link ESCAPE="HTML"></foaf:homepage>
-	<rdfs:seeAlso rdf:resource="<TMPL_VAR uri ESCAPE="HTML">" />
+	<foaf:name>{{ name }}</foaf:name>
+	<foaf:homepage>{{ link | e }}</foaf:homepage>
+	<rdfs:seeAlso rdf:resource="{{ uri | e }}" />
 
-<TMPL_LOOP Channels>
+	{% for channel in Channels %}
 	<foaf:member>
 		<foaf:Agent>
-			<foaf:name><TMPL_VAR name></foaf:name>
+			<foaf:name>{{ channel.name }}</foaf:name>
 			<foaf:weblog>
-				<foaf:Document rdf:about="<TMPL_VAR link ESCAPE="HTML">">
-					<dc:title><TMPL_VAR title></dc:title>
+				<foaf:Document rdf:about="{{ channel.link | e }}">
+					<dc:title>{{ channel.title }}</dc:title>
 					<rdfs:seeAlso>
-						<rss:channel rdf:about="<TMPL_VAR uri ESCAPE="HTML">" />
+						<rss:channel rdf:about="{{ channel.uri | e }}" />
 					</rdfs:seeAlso>
 				</foaf:Document>
 			</foaf:weblog>
 		</foaf:Agent>
 	</foaf:member>
-</TMPL_LOOP>
+	{% endfor %}
 
 </foaf:Group>
 </rdf:RDF>
