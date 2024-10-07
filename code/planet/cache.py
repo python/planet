@@ -42,7 +42,7 @@ class CachedInfo:
     def __init__(self, cache: shelve.Shelf[Any], id_, root=False):
         self._type: dict[str, str] = {}
         self._value: dict[str, Any] = {}
-        self._cached: dict[str, Any] = {}
+        self._cached: dict[str, bool] = {}
 
         self._cache = cache
         self._id = id_.replace(" ", "%20")
@@ -71,7 +71,7 @@ class CachedInfo:
                 # Key either hasn't been loaded, or is one for the cache
                 self._value[key] = self._cache[cache_key]
                 self._type[key] = self._cache[f"{cache_key} type"]
-                self._cached[key] = 1
+                self._cached[key] = True
 
     def cache_write(self, sync: bool = True):
         """Write information to the cache."""
@@ -214,7 +214,7 @@ class CachedInfo:
         value = self._value[key]
         return tuple(int(i) for i in value.split(" "))
 
-    def set_as_null(self, key, value, cached: bool = True):
+    def set_as_null(self, key, _value, cached: bool = True):
         """Set the key to the null value.
 
         This only exists to make things less magic.

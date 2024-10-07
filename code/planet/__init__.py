@@ -18,6 +18,8 @@ import os
 import re
 import shelve
 import time
+from datetime import datetime
+from functools import total_ordering
 from hashlib import md5
 from html.parser import HTMLParser
 from typing import cast
@@ -95,7 +97,7 @@ def template_info(item, date_format):
         else:
             info[key] = item[key]
     if "title" in item.keys():
-        info["title_plain"] = stripHtml(info["title"]).result
+        info["title_plain"] = Markup(info["title"])
 
     return info
 
@@ -243,6 +245,7 @@ class Planet:
 
         # The other configuration blocks are channels to subscribe to
         for feed_url in self.config.sections():
+            # The "Planet" config section is a special case. We also allow template-file specific configuration, apparently :D
             if feed_url == "Planet" or feed_url in template_files:
                 continue
 
@@ -457,7 +460,7 @@ class Planet:
 
                     if item.id not in seen_guids:
                         seen_guids[item.id] = 1
-                        items.append((time.mktime(item.date), item.order, item))
+                        items.append((item.time_since_epoch, item.order, item))
 
         # Sort the list
         if sorted:
@@ -597,7 +600,7 @@ class Channel(cache.CachedInfo):
         for item in self._items.values():
             if hidden or "hidden" not in item:
                 try:
-                    items.append((time.mktime(item.date), item.order, item))
+                    items.append((item.time_since_epoch, item.order, item))
                 except OverflowError:
                     log.warning(f"Unable to parse date for {item.id}")
 
@@ -855,12 +858,13 @@ class Channel(cache.CachedInfo):
     def get_name(self, key):
         """Return the key containing the name."""
         for key in ("name", "title"):
-            if key in self and self.key_type(key) != self.NULL:
+            if self.has_key(key) and self.key_type(key) != self.NULL:
                 return self.get_as_string(key)
 
         return ""
 
 
+@total_ordering
 class NewsItem(cache.CachedInfo):
     """An item of news.
 
@@ -997,6 +1001,18 @@ class NewsItem(cache.CachedInfo):
         # Generate the date field if we need to
         self.get_date("date")
 
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __lt__(self, other):
+        # compare on the date field, and then the order field
+        if self.date < other.date:
+            return True
+        elif self.date == other.date:
+            return self.order < other.order
+        else:
+            return False
+
     def get_date(self, key):
         """Get (or update) the date key.
 
@@ -1029,6 +1045,13 @@ class NewsItem(cache.CachedInfo):
 
         self.set_as_date(key, date)
         return date
+
+    @property
+    def time_since_epoch(self) -> float:
+        try:
+            return time.mktime(self.date)
+        except OverflowError:
+            return 0.0
 
     def get_content(self, key):
         """Return the key containing the content."""
