@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example RSS Feed</title>
+    <link>https://example.com/rss</link>
+    <description>This is an example of an RSS feed</description>
+    <item>
+      <title>Example Item 1</title>
+      <link>https://example.com/item1</link>
+      <description>This is a description of item 1</description>
+      <author>author@example.com (John Doe)</author>
+      <updated>Thu, 21 Oct 2021 16:29:00 +0000</updated>
+      <guid>https://example.com/item1</guid>
+    </item>
+    <item>
+      <title>Example Item 2</title>
+      <link>https://example.com/item2</link>
+      <description>This is a description of item 2</description>
+      <author>author@example.com (John Doe)</author>
+      <pubDate>Thu, 22 Oct 2021 16:29:00 +0000</pubDate>
+      <guid>https://example.com/item2</guid>
+    </item>
+  </channel>
+</rss>

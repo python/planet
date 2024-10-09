@@ -13,13 +13,15 @@ import os
 import re
 import shelve
 import time
-from typing import Any
+from typing import Any, TypeAlias
 
 # Regular expressions to sanitise cache filenames
 re_url_scheme = re.compile(r"^[^:]*://")
 re_slash = re.compile(r"[?/]+")
 re_initial_cruft = re.compile(r"^[,.]*")
 re_final_cruft = re.compile(r"[,.]*$")
+
+TimeTuple: TypeAlias = tuple[int, int, int, int, int, int, int, int, int]
 
 
 class CachedInfo:
@@ -206,7 +208,7 @@ class CachedInfo:
         self._type[key] = self.DATE
         self._cached[key] = cached
 
-    def get_as_date(self, key):
+    def get_as_date(self, key: str) -> TimeTuple | None:
         """Return the key as a date value."""
         key = key.replace(" ", "_")
         if key not in self._value:

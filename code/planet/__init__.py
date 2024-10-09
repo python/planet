@@ -122,8 +122,14 @@ class Planet:
         self._channels = []
 
         self.user_agent = USER_AGENT
-        self.cache_directory = CACHE_DIRECTORY
-        self.new_feed_items = NEW_FEED_ITEMS
+        if self.config.has_option("Planet", "cache_directory"):
+            self.cache_directory = self.config.get("Planet", "cache_directory")
+        else:
+            self.cache_directory = CACHE_DIRECTORY
+        if self.config.has_option("Planet", "new_feed_items"):
+            self.new_feed_items = int(self.config.get("Planet", "new_feed_items"))
+        else:
+            self.new_feed_items = NEW_FEED_ITEMS
         self.filter = None
         self.exclude = None
 
@@ -235,10 +241,6 @@ class Planet:
 
         # Create a planet
         log.info("Loading cached data")
-        if self.config.has_option("Planet", "cache_directory"):
-            self.cache_directory = self.config.get("Planet", "cache_directory")
-        if self.config.has_option("Planet", "new_feed_items"):
-            self.new_feed_items = int(self.config.get("Planet", "new_feed_items"))
         self.user_agent = f"{planet_name} +{planet_link} {self.user_agent}"
         if self.config.has_option("Planet", "filter"):
             self.filter = self.config.get("Planet", "filter")
@@ -1013,7 +1015,7 @@ class NewsItem(cache.CachedInfo):
         else:
             return False
 
-    def get_date(self, key):
+    def get_date(self, key: str) -> cache.TimeTuple | None:
         """Get (or update) the date key.
 
         We check whether the date the entry claims to have been changed is
@@ -1034,8 +1036,9 @@ class NewsItem(cache.CachedInfo):
             date = None
 
         if date is not None:
-            if date > self._channel.updated:
-                date = self._channel.updated
+            if self._channel.updated is not None:
+                if date > self._channel.updated:
+                    date = self._channel.updated
         #            elif date < self._channel.last_updated:
         #                date = self._channel.updated
         elif key in self and self.key_type(key) != self.NULL:
@@ -1043,7 +1046,8 @@ class NewsItem(cache.CachedInfo):
         else:
             date = self._channel.updated
 
-        self.set_as_date(key, date)
+        if date is not None:
+            self.set_as_date(key, date)
         return date
 
     @property
