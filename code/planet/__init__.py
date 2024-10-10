@@ -578,7 +578,16 @@ class Channel(cache.CachedInfo):
         self.exclude = None
         self.next_order = "0"
         self.cache_read()
-        self.cache_read_entries()
+        try:
+            self.cache_read_entries()
+        except SystemError:
+            # This can be triggered by https://github.com/python/cpython/issues/91228 (I think!) on
+            # some DBs, but really, only on macOS. While that is not how this is run in production,
+            # it's kinda nice to test. So, we catch the failure here, and flush the etag / modified
+            # fields so that update always works.
+            log.error(f"DB corruption for {url}; reloading the feed")
+            self.url_etag = None
+            self.url_modified = None
 
         if planet.config.has_section(url):
             for option in planet.config.options(url):
@@ -618,6 +627,7 @@ class Channel(cache.CachedInfo):
 
     def cache_read_entries(self):
         """Read entry information from the cache."""
+
         keys = self._cache.keys()
         for key in keys:
             if key.find(" ") != -1:
