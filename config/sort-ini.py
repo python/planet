@@ -1,41 +1,40 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
-import ConfigParser
+from configparser import DEFAULTSECT, RawConfigParser
 
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 else:
-    filename = 'config.ini'
-    
-oconfig = ConfigParser.RawConfigParser()
+    filename = "config.ini"
+
+oconfig = RawConfigParser()
 oconfig.read(filename)
 
 # This part will destroy the configuration if there's a crash while
 # writing the output.  We're in an GIT-controlled directory, so
 # I didn't care enough to fix this.
-with open(filename, 'wb') as fd:
+with open(filename, "wb") as fd:
     # Copy of write() code that sorts output by section
     if oconfig._defaults:
         fd.write("[%s]\n" % DEFAULTSECT)
-        for (key, value) in oconfig._defaults.items():
-            fd.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
+        for key, value in oconfig._defaults.items():
+            fd.write("{} = {}\n".format(key, str(value).replace("\n", "\n\t")))
         fd.write("\n")
-    
+
     result = {}
     for section in sorted(oconfig._sections):
-        if section == 'Planet':
+        if section == "Planet":
             fd.write("[%s]\n" % section)
-        for (key, value) in oconfig._sections[section].items():
+        for key, value in oconfig._sections[section].items():
             if key != "__name__":
-                if section == 'Planet':
-                    fd.write("%s = %s\n" %
-                         (key, str(value).replace('\n', '\n\t')))
+                if section == "Planet":
+                    fd.write("{} = {}\n".format(key, str(value).replace("\n", "\n\t")))
                 else:
-                    result[value.replace('"', '')] = section
-        if section == 'Planet':
+                    result[value.replace('"', "")] = section
+        if section == "Planet":
             fd.write("\n")
-    
+
     for key, value in sorted(result.items()):
         fd.write("[%s]\n" % value)
         name = key
@@ -43,4 +42,3 @@ with open(filename, 'wb') as fd:
             name = '"%s"' % key
         fd.write("name = %s\n" % name)
         fd.write("\n")
-

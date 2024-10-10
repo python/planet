@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python3
 """Item cache.
 
 Between runs of Planet we need somewhere to store the feed information
@@ -12,13 +11,17 @@ that the rest of the code can take the persistance for granted.
 
 import os
 import re
-
+import shelve
+import time
+from typing import Any, TypeAlias
 
 # Regular expressions to sanitise cache filenames
-re_url_scheme    = re.compile(r'^[^:]*://')
-re_slash         = re.compile(r'[?/]+')
-re_initial_cruft = re.compile(r'^[,.]*')
-re_final_cruft   = re.compile(r'[,.]*$')
+re_url_scheme = re.compile(r"^[^:]*://")
+re_slash = re.compile(r"[?/]+")
+re_initial_cruft = re.compile(r"^[,.]*")
+re_final_cruft = re.compile(r"[,.]*$")
+
+TimeTuple: TypeAlias = tuple[int, int, int, int, int, int, int, int, int]
 
 
 class CachedInfo:
@@ -33,20 +36,21 @@ class CachedInfo:
     and implement get_FIELD and set_FIELD functions which will be
     automatically called.
     """
-    STRING = "string"
-    DATE   = "date"
-    NULL   = "null"
 
-    def __init__(self, cache, id_, root=0):
-        self._type = {}
-        self._value = {}
-        self._cached = {}
+    STRING = "string"
+    DATE = "date"
+    NULL = "null"
+
+    def __init__(self, cache: shelve.Shelf[Any], id_, root=False):
+        self._type: dict[str, str] = {}
+        self._value: dict[str, Any] = {}
+        self._cached: dict[str, bool] = {}
 
         self._cache = cache
         self._id = id_.replace(" ", "%20")
         self._root = root
 
-    def cache_key(self, key):
+    def cache_key(self, key: str) -> str:
         """Return the cache key name for the given key."""
         key = key.replace(" ", "_")
         if self._root:
@@ -54,85 +58,74 @@ class CachedInfo:
         else:
             return self._id + " " + key
 
-    def cache_read(self):
+    def cache_read(self) -> None:
         """Read information from the cache."""
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
+        keys_key = " keys" if self._root else self._id
 
-        if self._cache.has_key(keys_key):
+        if keys_key in self._cache:
             keys = self._cache[keys_key].split(" ")
         else:
             return
 
         for key in keys:
             cache_key = self.cache_key(key)
-            if not self._cached.has_key(key) or self._cached[key]:
+            if key not in self._cached or self._cached[key]:
                 # Key either hasn't been loaded, or is one for the cache
                 self._value[key] = self._cache[cache_key]
-                self._type[key] = self._cache[cache_key + " type"]
-                self._cached[key] = 1
+                self._type[key] = self._cache[f"{cache_key} type"]
+                self._cached[key] = True
 
-    def cache_write(self, sync=1):
+    def cache_write(self, sync: bool = True):
         """Write information to the cache."""
-        self.cache_clear(sync=0)
+        self.cache_clear(sync=False)
 
         keys = []
         for key in self.keys():
             cache_key = self.cache_key(key)
             if not self._cached[key]:
-                if self._cache.has_key(cache_key):
+                if cache_key in self._cache:
                     # Non-cached keys need to be cleared
-                    del(self._cache[cache_key])
-                    del(self._cache[cache_key + " type"])
+                    del self._cache[cache_key]
+                    del self._cache[f"{cache_key} type"]
                 continue
 
             keys.append(key)
             self._cache[cache_key] = self._value[key]
-            self._cache[cache_key + " type"] = self._type[key]
+            self._cache[f"{cache_key} type"] = self._type[key]
 
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
-
+        keys_key = " keys" if self._root else self._id
         self._cache[keys_key] = " ".join(keys)
         if sync:
             self._cache.sync()
 
-    def cache_clear(self, sync=1):
+    def cache_clear(self, sync: bool = True):
         """Remove information from the cache."""
-        if self._root:
-            keys_key = " keys"
-        else:
-            keys_key = self._id
+        keys_key = " keys" if self._root else self._id
 
-        if self._cache.has_key(keys_key):
-            keys = self._cache[keys_key].split(" ")
-            del(self._cache[keys_key])
-        else:
+        if keys_key not in self._cache:
             return
 
+        keys = self._cache[keys_key].split(" ")
+        del self._cache[keys_key]
         for key in keys:
             cache_key = self.cache_key(key)
-            del(self._cache[cache_key])
-            del(self._cache[cache_key + " type"])
+            del self._cache[cache_key]
+            del self._cache[f"{cache_key} type"]
 
         if sync:
             self._cache.sync()
 
-    def has_key(self, key):
+    def has_key(self, key: str) -> bool:
         """Check whether the key exists."""
         key = key.replace(" ", "_")
-        return self._value.has_key(key)
+        return key in self._value
 
     def key_type(self, key):
         """Return the key type."""
         key = key.replace(" ", "_")
         return self._type[key]
 
-    def set(self, key, value, cached=1):
+    def set(self, key: str, value: Any, cached: bool = True) -> Any:
         """Set the value of the given key.
 
         If a set_KEY function exists that is called otherwise the
@@ -148,15 +141,17 @@ class CachedInfo:
         else:
             return func(key, value)
 
-        if value == None:
+        if value is None:
             return self.set_as_null(key, value)
+        elif isinstance(value, time.struct_time):
+            return self.set_as_date(key, value)
         else:
             try:
-                return self.set_as_string(key, value)
+                return self.set_as_string(key, value, cached)
             except TypeError:
-                return self.set_as_date(key, value)
+                return self.set_as_date(key, value, cached)
 
-    def get(self, key):
+    def get(self, key: str) -> Any | None:
         """Return the value of the given key.
 
         If a get_KEY function exists that is called otherwise the
@@ -180,7 +175,7 @@ class CachedInfo:
 
         return self._value[key]
 
-    def set_as_string(self, key, value, cached=1):
+    def set_as_string(self, key, value, cached: bool = True):
         """Set the key to the string value.
 
         The value is converted to UTF-8 if it is a Unicode string, otherwise
@@ -197,33 +192,31 @@ class CachedInfo:
     def get_as_string(self, key):
         """Return the key as a string value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
-
+        if key not in self._value:
+            raise KeyError(key)
         return self._value[key]
 
-    def set_as_date(self, key, value, cached=1):
+    def set_as_date(self, key, value, cached: bool = True):
         """Set the key to the date value.
 
         The date should be a 9-item tuple as returned by time.gmtime().
         """
-        value = " ".join([ str(s) for s in value ])
+        value = " ".join([str(s) for s in value])
 
         key = key.replace(" ", "_")
         self._value[key] = value
         self._type[key] = self.DATE
         self._cached[key] = cached
 
-    def get_as_date(self, key):
+    def get_as_date(self, key: str) -> TimeTuple | None:
         """Return the key as a date value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
-
+        if key not in self._value:
+            raise KeyError(key)
         value = self._value[key]
-        return tuple([ int(i) for i in value.split(" ") ])
+        return tuple(int(i) for i in value.split(" "))
 
-    def set_as_null(self, key, value, cached=1):
+    def set_as_null(self, key, _value, cached: bool = True):
         """Set the key to the null value.
 
         This only exists to make things less magic.
@@ -236,20 +229,18 @@ class CachedInfo:
     def get_as_null(self, key):
         """Return the key as the null value."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
-
-        return None
+        if key not in self._value:
+            raise KeyError(key)
 
     def del_key(self, key):
         """Delete the given key."""
         key = key.replace(" ", "_")
-        if not self.has_key(key):
-            raise KeyError, key
+        if key not in self._value:
+            raise KeyError(key)
 
-        del(self._value[key])
-        del(self._type[key])
-        del(self._cached[key])
+        del self._value[key]
+        del self._type[key]
+        del self._cached[key]
 
     def keys(self):
         """Return the list of cached keys."""
@@ -261,10 +252,10 @@ class CachedInfo:
 
     # Special methods
     __contains__ = has_key
-    __setitem__  = set_as_string
-    __getitem__  = get
-    __delitem__  = del_key
-    __delattr__  = del_key
+    __setitem__ = set_as_string
+    __getitem__ = get
+    __delitem__ = del_key
+    __delattr__ = del_key
 
     def __setattr__(self, key, value):
         if key.startswith("_"):
@@ -273,10 +264,9 @@ class CachedInfo:
             self.set(key, value)
 
     def __getattr__(self, key):
-        if self.has_key(key):
+        if key in self._value:
             return self.get(key)
-        else:
-            raise AttributeError, key
+        raise AttributeError(key)
 
 
 def filename(directory, filename):
@@ -292,15 +282,9 @@ def filename(directory, filename):
 
     return os.path.join(directory, filename)
 
+
 def utf8(value):
     """Return the value as a UTF-8 string."""
-    if type(value) == type(u''):
-        return value.encode("utf-8")
-    else:
-        try:
-            return unicode(value, "utf-8").encode("utf-8")
-        except UnicodeError:
-            try:
-                return unicode(value, "iso-8859-1").encode("utf-8")
-            except UnicodeError:
-                return unicode(value, "ascii", "replace").encode("utf-8")
+    if isinstance(value, str):
+        return value
+    return value.decode("utf-8") if isinstance(value, bytes) else str(value)
