@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: sort-ini
+        name: Sort config.ini
+        entry: python3 config/sort-ini.py config/config.ini
+        language: python
+        pass_filenames: false
+        files: ^config/config.ini$
