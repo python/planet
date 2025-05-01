@@ -33,7 +33,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.deploy
+          file: Dockerfile.deploy3
           push: true
           tags: |
             ghcr.io/python/planetpython-3:${{ github.sha }}-${{ matrix.config.arch }}
