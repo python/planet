@@ -1,0 +1,13 @@
+FROM python:2.7.18
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+RUN mkdir /planet
+WORKDIR /planet
+
+COPY code /planet/code
+COPY config /planet/config
+COPY static /planet/static
+
+
