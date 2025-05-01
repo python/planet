@@ -1,0 +1,16 @@
+FROM python:3.13-bookworm
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+RUN mkdir /planet
+WORKDIR /planet
+
+COPY code /planet/code
+COPY pyproject.toml /planet/pyproject.toml
+COPY config /planet/config
+COPY static /planet/static
+
+RUN python -m pip install build
+RUN python3 -m build
+RUN python3 -m pip install dist/*.whl
